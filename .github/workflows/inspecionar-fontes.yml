@@ -1,0 +1,30 @@
+name: Inspecionar fontes Android V3
+on:
+  push:
+    paths: [".github/workflows/inspecionar-fontes.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fontes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruir fontes
+        run: |
+          set -euo pipefail
+          cat source/part-{01..04}.txt | base64 -d > /tmp/base.tar.xz
+          echo "c42ca8731fada44119ff583be298e6982e9aa1617f6aac2ca54e06d3cfa17367  /tmp/base.tar.xz" | sha256sum -c -
+          tar -xJf /tmp/base.tar.xz
+          cat source3/part-{01..05}.txt | base64 -d > /tmp/v3.tar.xz
+          echo "389905dae91c28bf318dc4772c9cf7c442aae696ac4b0ff2c51d4c603aab306c  /tmp/v3.tar.xz" | sha256sum -c -
+          tar -xJf /tmp/v3.tar.xz
+          mkdir -p export
+          cp -r app export/
+          cp settings.gradle build.gradle gradle.properties export/
+          tar -czf fontes-android-v3.tar.gz -C export .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Fontes-Android-V3
+          path: fontes-android-v3.tar.gz
+          retention-days: 7
