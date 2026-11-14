@@ -82,6 +82,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Instalar analisador MP4 (FFmpeg / ffprobe)
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffprobe -version | head -1
       - name: Habilitar aceleração KVM no emulador
         shell: bash
         run: |
