@@ -1,0 +1,67 @@
+name: Compilar Android Reels 2.0 — Reel testado
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'android_v2/**'
+      - '.github/workflows/gerar-apk-v2.yml'
+permissions:
+  contents: read
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restaurar projeto Android original com validacao
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat source/part-{01..04}.txt | base64 -d > /tmp/helper-base.tar.xz
+          echo 'c42ca8731fada44119ff583be298e6982e9aa1617f6aac2ca54e06d3cfa17367  /tmp/helper-base.tar.xz' | sha256sum -c -
+          tar -xJf /tmp/helper-base.tar.xz
+          mkdir -p app/src/main/res/drawable
+          cat > app/src/main/res/drawable/ic_launcher.xml <<'ICON'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+            android:width="108dp" android:height="108dp"
+            android:viewportWidth="108" android:viewportHeight="108">
+            <path android:fillColor="#11192F" android:pathData="M0,0 L108,0 L108,108 L0,108 Z"/>
+            <path android:fillColor="#87E8D5" android:pathData="M29,21 L88,54 L29,87 Z"/>
+            <path android:fillColor="#FFFFFF" android:pathData="M38,34 L69,54 L38,74 Z"/>
+          </vector>
+          ICON
+          sed -i 's|@mipmap/ic_launcher|@drawable/ic_launcher|' app/src/main/AndroidManifest.xml
+      - name: Aplicar nova interface e verificador de Reel
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat android_v2/parts/0*.txt | base64 -d | gzip -d > app/src/main/java/br/com/helper/reels/MainActivity.java
+          echo '2a31b61c7d8d6842e08eb545aa84ea55ba9e17bacdcc1c228962371c7bcce0eb  app/src/main/java/br/com/helper/reels/MainActivity.java' | sha256sum -c -
+          sed -i 's/versionCode 1/versionCode 2/' app/build.gradle
+          sed -i "s/versionName '1.0.0'/versionName '2.0.0'/" app/build.gradle
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Instalar Android 35
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          MANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -1)
+          yes | "$MANAGER" --licenses >/dev/null || true
+          "$MANAGER" 'platforms;android-35' 'build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Compilar e validar APK Android
+        run: |
+          gradle --no-daemon assembleDebug
+          test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Entregar APK 2.0
+        uses: actions/upload-artifact@v4
+        with:
+          name: Helper-Curiosidades-Reels-v2-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
