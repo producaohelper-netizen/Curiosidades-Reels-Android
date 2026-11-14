@@ -82,6 +82,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Habilitar aceleração KVM no emulador
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod a+rw /dev/kvm
+            ls -l /dev/kvm
+          else
+            echo "KVM indisponível; rodar emulação por software."
+          fi
       - name: Executar aplicativo e validar MP4 no Android virtual
         uses: reactivecircus/android-emulator-runner@v2
         with:
