@@ -8,8 +8,10 @@ adb shell pm list packages | grep -Ei 'tts|speech|googlequicksearch' || true
 echo '--- Instalando motor TTS de teste, apenas no emulador ---'
 curl -fL --retry 2 --connect-timeout 15 --max-time 100 -o /tmp/espeak-test.apk https://f-droid.org/repo/com.reecedunn.espeak_22.apk
 adb install -r /tmp/espeak-test.apk
-adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p com.reecedunn.espeak || true
-sleep 8
+adb shell am start -n com.reecedunn.espeak/.eSpeakActivity
+sleep 4
+adb shell am start -a android.speech.tts.engine.INSTALL_TTS_DATA -n com.reecedunn.espeak/.DownloadVoiceData || true
+sleep 25
 adb shell settings put secure tts_default_synth com.reecedunn.espeak
 adb shell settings get secure tts_default_synth
 adb install -r apk/app-debug.apk
