@@ -21,6 +21,7 @@ jobs:
           cat source3/part-{01..05}.txt | base64 --decode > /tmp/helper-v3-patch.tar.xz
           echo "389905dae91c28bf318dc4772c9cf7c442aae696ac4b0ff2c51d4c603aab306c  /tmp/helper-v3-patch.tar.xz" | sha256sum --check
           tar --extract --xz --file=/tmp/helper-v3-patch.tar.xz
+          python3 scripts/patch-tts.py
           test -f app/src/main/java/br/com/helper/reels/TrendFeed.java
           test -f app/src/main/java/br/com/helper/reels/FactCatalog.java
           test -f app/src/main/java/br/com/helper/reels/MainActivity.java
