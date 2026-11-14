@@ -8,35 +8,48 @@ permissions:
 jobs:
   compilar:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Preparar fontes do projeto
+      - name: Reconstruir o projeto Android
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f 'Helper_Curiosidades_Reels_Android_Projeto.zip' ]; then
-            unzip -q -o Helper_Curiosidades_Reels_Android_Projeto.zip -d /tmp/reels-android
-            cp -a /tmp/reels-android/Helper_Curiosidades_Reels_Android/. .
-          elif [ -d 'Helper_Curiosidades_Reels_Android' ]; then
-            cp -a Helper_Curiosidades_Reels_Android/. .
-          elif [ ! -f 'settings.gradle' ]; then
-            echo 'ERRO: o ZIP do projeto Android nao foi enviado ao repositorio.'
-            exit 1
-          fi
-          test -f app/src/main/AndroidManifest.xml
-      - uses: actions/setup-java@v4
+          cat source/part-{01..04}.txt | base64 --decode > /tmp/helper-source.tar.xz
+          echo "c42ca8731fada44119ff583be298e6982e9aa1617f6aac2ca54e06d3cfa17367  /tmp/helper-source.tar.xz" | sha256sum --check
+          tar --extract --xz --file=/tmp/helper-source.tar.xz
+          test -f app/src/main/java/br/com/helper/reels/MainActivity.java
+          mkdir -p app/src/main/res/drawable
+          cat > app/src/main/res/drawable/ic_launcher.xml <<'ICON'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp" android:height="108dp"
+              android:viewportWidth="108" android:viewportHeight="108">
+              <path android:fillColor="#171B30"
+                  android:pathData="M0,0 L108,0 L108,108 L0,108 Z"/>
+              <path android:fillColor="#BA8BFF"
+                  android:pathData="M29,21 L88,54 L29,87 Z"/>
+              <path android:fillColor="#FFFFFF"
+                  android:pathData="M37,35 L70,54 L37,73 Z"/>
+          </vector>
+          ICON
+          sed -i 's|@mipmap/ic_launcher|@drawable/ic_launcher|' app/src/main/AndroidManifest.xml
+      - name: Instalar Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-      - name: Instalar Android SDK 35
+      - name: Instalar Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Instalar SDK 35
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
-      - uses: gradle/actions/setup-gradle@v4
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Compilar APK de depuracao
-        run: gradle --no-daemon assembleDebug
-      - uses: actions/upload-artifact@v4
+      - name: Compilar APK para Android
+        run: gradle --no-daemon --stacktrace assembleDebug
+      - name: Disponibilizar APK
+        uses: actions/upload-artifact@v4
         with:
           name: Helper-Curiosidades-Reels-APK
           path: app/build/outputs/apk/debug/app-debug.apk
