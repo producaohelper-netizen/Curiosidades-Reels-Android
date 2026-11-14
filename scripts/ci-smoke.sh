@@ -5,21 +5,12 @@ echo '--- Estado do Android virtual ---'
 adb devices -l
 adb shell getprop ro.build.version.sdk
 adb shell pm list packages | grep -Ei 'tts|speech|googlequicksearch' || true
-echo '--- Instalando motor TTS de teste, apenas no emulador ---'
-curl -fL --retry 1 --connect-timeout 20 --max-time 300 -o /tmp/espeak-test.apk https://f-droid.org/repo/com.reecedunn.espeak_22.apk
-adb install -r /tmp/espeak-test.apk
-adb shell am start -n com.reecedunn.espeak/.eSpeakActivity
-sleep 4
-adb shell am start -a android.speech.tts.engine.INSTALL_TTS_DATA -n com.reecedunn.espeak/.DownloadVoiceData || true
-sleep 25
-adb shell settings put secure tts_default_synth com.reecedunn.espeak
-adb shell settings get secure tts_default_synth
 adb install -r apk/app-debug.apk
 echo '--- Iniciando geração local de Reel ---'
 adb logcat -c || true
 adb shell am start -W -n br.com.helper.curiosidadesreels/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
 ready=0
-for i in $(seq 1 140); do
+for i in $(seq 1 180); do
   sleep 5
   if adb logcat -d -s HelperReels:E 2>/dev/null | grep -q 'Generation failure'; then
     echo 'FALHA DO APLICATIVO:'
