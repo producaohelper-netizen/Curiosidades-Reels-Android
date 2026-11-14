@@ -1,0 +1,43 @@
+name: Gerar APK Curiosidades Reels
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar fontes do projeto
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f 'Helper_Curiosidades_Reels_Android_Projeto.zip' ]; then
+            unzip -q -o Helper_Curiosidades_Reels_Android_Projeto.zip -d /tmp/reels-android
+            cp -a /tmp/reels-android/Helper_Curiosidades_Reels_Android/. .
+          elif [ -d 'Helper_Curiosidades_Reels_Android' ]; then
+            cp -a Helper_Curiosidades_Reels_Android/. .
+          elif [ ! -f 'settings.gradle' ]; then
+            echo 'ERRO: o ZIP do projeto Android nao foi enviado ao repositorio.'
+            exit 1
+          fi
+          test -f app/src/main/AndroidManifest.xml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Instalar Android SDK 35
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Compilar APK de depuracao
+        run: gradle --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Helper-Curiosidades-Reels-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
