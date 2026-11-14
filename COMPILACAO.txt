@@ -1,0 +1,2 @@
+Projeto Android original enviado em source/part-01..04.txt.
+Workflow .github/workflows/gerar-apk.yml prepara e compila o APK.
