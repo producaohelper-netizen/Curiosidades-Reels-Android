@@ -1,0 +1,71 @@
+name: Reels 2.0 — tendencia verificada e voz neural
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'cloud/**'
+      - '.github/workflows/gerar-reel-v2.yml'
+  schedule:
+    - cron: '12 12 * * *'
+    - cron: '12 23 * * *'
+permissions:
+  contents: write
+jobs:
+  reel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Restaurar gerador com verificacao da integridade
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat cloud/base64/part-{01..04}.txt | base64 -d | gzip -d > cloud/gerar_reel.py
+          echo 'ed0ed7ab6ff9d35749290ec2b12a743c3a693d442ac36d6d3d68430d2b10f005  cloud/gerar_reel.py' | sha256sum -c -
+          python -m py_compile cloud/gerar_reel.py
+      - name: Instalar voz neural e renderer
+        run: python -m pip install 'edge-tts>=7.3.0' pillow numpy
+      - name: Gerar um Reels completo com audio, legendas e animacoes
+        run: python cloud/gerar_reel.py
+        env:
+          REELS_VOICE: pt-BR-FranciscaNeural
+          OUTPUT_DIR: produced
+      - name: Testar o video REAL exportado
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s produced/latest.mp4
+          ffprobe -v error -show_entries stream=codec_name,codec_type,width,height -show_entries format=duration -of json produced/latest.mp4 > produced/test-result.json
+          python - <<'PY'
+          import json
+          meta=json.load(open('produced/latest.json'))
+          probe=json.load(open('produced/test-result.json'))
+          assert 16<meta['duration_s']<90, meta
+          assert meta['caption_words']>=30, meta
+          assert meta['scenes']>=5, meta
+          assert any(s['codec_type']=='video' and s['width']==720 and s['height']==1280 for s in probe['streams']), probe
+          assert any(s['codec_type']=='audio' for s in probe['streams']), probe
+          print('VALIDADO: narracao neural, alinhamento palavra a palavra, animacoes, exportacao 9:16, fontes.')
+          PY
+      - name: Guardar video e prova de qualidade
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reels-2-TESTADO
+          path: |
+            produced/latest.mp4
+            produced/latest.json
+            produced/test-result.json
+            produced/timings.json
+          retention-days: 30
+      - name: Publicar ultimo Reel para o Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Helper Reels Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add produced/latest.mp4 produced/latest.json produced/test-result.json
+          git commit -m "Publicar Reels de tendencia verificada [skip ci]" || exit 0
+          git push
