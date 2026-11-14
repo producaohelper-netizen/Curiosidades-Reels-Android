@@ -26,6 +26,22 @@ jobs:
           cat cloud/base64/part-{01..04}.txt | base64 -d | gzip -d > cloud/gerar_reel.py
           echo 'ed0ed7ab6ff9d35749290ec2b12a743c3a693d442ac36d6d3d68430d2b10f005  cloud/gerar_reel.py' | sha256sum -c -
           python -m py_compile cloud/gerar_reel.py
+      - name: Corrigir filtro de tendencias e disponibilizar FFmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('cloud/gerar_reel.py')
+          s=p.read_text()
+          before="if any(normalize(k) in t for k in story['match'])"
+          after="if any(re.search(r'(?<!\\w)'+re.escape(normalize(k))+r'(?!\\w)',t) for k in story['match'])"
+          assert before in s
+          p.write_text(s.replace(before,after),encoding='utf-8')
+          PY
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -1
       - name: Instalar voz neural e renderer
         run: python -m pip install 'edge-tts>=7.3.0' pillow numpy
       - name: Gerar um Reels completo com audio, legendas e animacoes
