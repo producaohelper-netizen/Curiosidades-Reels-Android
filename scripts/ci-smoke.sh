@@ -6,7 +6,7 @@ adb devices -l
 adb shell getprop ro.build.version.sdk
 adb shell pm list packages | grep -Ei 'tts|speech|googlequicksearch' || true
 echo '--- Instalando motor TTS de teste, apenas no emulador ---'
-curl -fL --retry 2 --connect-timeout 15 --max-time 100 -o /tmp/espeak-test.apk https://f-droid.org/repo/com.reecedunn.espeak_22.apk
+curl -fL --retry 1 --connect-timeout 20 --max-time 300 -o /tmp/espeak-test.apk https://f-droid.org/repo/com.reecedunn.espeak_22.apk
 adb install -r /tmp/espeak-test.apk
 adb shell am start -n com.reecedunn.espeak/.eSpeakActivity
 sleep 4
