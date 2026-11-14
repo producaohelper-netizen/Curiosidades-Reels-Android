@@ -70,6 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: Helper-Curiosidades-Reels-APK
@@ -79,47 +80,18 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Preparar Android e gerar vídeo real no emulador
+      - name: Executar aplicativo e validar MP4 no Android virtual
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 30
           target: google_apis
           arch: x86_64
-          profile: pixel_5
-          ram-size: 4096M
-          disk-size: 6G
+          profile: pixel_2
+          ram-size: 3072M
+          disk-size: 5G
           emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: |
-            set -euo pipefail
-            adb install apk/app-debug.apk
-            adb shell pm list packages | grep -i 'tts\|speech' || true
-            adb shell am start -n br.com.helper.curiosidadesreels/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
-            mkdir -p teste
-            ready=0
-            for i in $(seq 1 100); do
-              sleep 8
-              if adb shell content query --uri content://media/external/video/media --projection _id:_display_name:is_pending 2>/dev/null | grep -q 'is_pending=0'; then
-                ready=1
-                break
-              fi
-              if [ "$((i%10))" = "0" ]; then
-                adb logcat -d -s HelperReels:E AndroidRuntime:E | tail -45 || true
-              fi
-            done
-            if [ "$ready" = "0" ]; then
-              echo 'ERRO: o app nao gerou video concluido dentro da janela de teste'
-              adb logcat -d -s HelperReels:E AndroidRuntime:E | tail -120
-              exit 1
-            fi
-            video=$(adb shell find /sdcard/Movies/HelperReels -type f -name '*.mp4' | tr -d '\r' | head -1)
-            if [ -z "$video" ]; then echo 'MP4 nao encontrado'; exit 1; fi
-            adb pull "$video" teste/reel-gerado-no-android.mp4
-            ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 teste/reel-gerado-no-android.mp4
-            ffprobe -v error -show_entries stream=codec_name,codec_type,width,height -of default=noprint_wrappers=1 teste/reel-gerado-no-android.mp4
-            ffprobe -v error -select_streams v -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q h264
-            ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q aac
-            test "$(stat -c%s teste/reel-gerado-no-android.mp4)" -gt 100000
-      - name: Publicar vídeo de teste gerado no emulador
+          script: bash scripts/ci-smoke.sh
+      - name: Publicar vídeo real gerado no Android
         uses: actions/upload-artifact@v4
         if: always()
         with:
