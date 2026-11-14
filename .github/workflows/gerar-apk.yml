@@ -38,10 +38,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Instalar Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Instalar SDK 35
-        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Instalar SDK Android 35 sem pacote legado
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -1)
+          echo "SDK Manager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
       - name: Instalar Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
