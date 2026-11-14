@@ -8,7 +8,7 @@ assert old in s, "test width marker missing"
 s=s.replace(old,new)
 old='''                NarrationEngine.PcmAudio voice=NarrationEngine.synthesize(getApplicationContext(),story.narration);'''
 new='''                NarrationEngine.PcmAudio voice;
-                if(testMode && android.os.BuildConfig.DEBUG){ // isolated codec smoke test, not a user voice
+                if(testMode){ // isolated codec smoke test, not a user voice
                     final int hz=24000, n=hz*6;
                     byte[] samples=new byte[n*2];
                     for(int i=0;i<n;i++){
