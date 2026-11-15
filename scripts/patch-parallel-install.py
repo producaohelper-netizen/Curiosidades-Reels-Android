@@ -19,6 +19,11 @@ if n==0:
  else:
   s,n=re.subn(r"(defaultConfig\s*\{)",'\\1\n        applicationId "br.com.helper.curiosidadesreels.nova"',s,count=1)
 assert n==1,f"Expected one applicationId or defaultConfig block, found {n}"
+# Override late in the script: legacy Gradle source can reset applicationId in build types.
+if gradle.suffix==".kts":
+ s+='\nandroid { defaultConfig { applicationId = "br.com.helper.curiosidadesreels.nova" } }\n'
+else:
+ s+='\nandroid { defaultConfig { applicationId "br.com.helper.curiosidadesreels.nova" } }\n'
 gradle.write_text(s,encoding="utf-8")
 manifest=Path("app/src/main/AndroidManifest.xml")
 m=manifest.read_text(encoding="utf-8")
