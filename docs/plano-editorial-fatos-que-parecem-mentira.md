@@ -26,3 +26,11 @@ História real 35%; ciência e natureza 30%; mistérios documentados 20%; cotidi
 
 ## Regra de aprovação
 Nenhum vídeo pode ser rotulado 'história real verificada' com uma única fonte enciclopédica. Conteúdos de mistério devem distinguir comprovado, hipótese e desconhecido.
+
+## Decisão de escopo — edição exclusiva (15/11/2026)
+O usuário determinou que **somente as regras deste plano** podem orientar a nova edição. Recursos antigos podem ser removidos. A migração deverá substituir, não simplesmente esconder, o fluxo anterior:
+- REMOVER da nova interface: opção de gerar sobre qualquer tema, botão de Google Trends irrestrito, rotação aleatória do catálogo, roteiros genéricos e geração sem fontes suficientes.
+- MANTER por necessidade do plano: renderizador MP4 9:16, narração, legendas sincronizadas, exportação e histórico antirrepetição.
+- ADICIONAR: fila de pautas editoriais verificadas, quatro pilares e pesos, ficha de duas fontes, gancho-contexto-desenvolvimento-revelação-CTA, controle de duração, registro de licenças de mídia, métricas 24/48/72h.
+- O teste de vídeo dinâmico anterior permanece **legado** e não comprova o novo produto.
+- **Critério para desativar o legado:** uma pauta aprovada deve ser renderizada em MP4 no emulador com fontes e roteiro editorial; então remover opções antigas e alterar o teste de CI para usar a nova pauta. Até isso ocorrer, não distribuir uma edição anunciada como pronta.
