@@ -29,9 +29,9 @@ if (( lookup == 0 )); then
   echo 'FALHA: consulta externa dinâmica não validada no Android'
   exit 1
 fi
-echo '--- Iniciando geração local de Reel ---'
+echo '--- Gerando MP4 completo sobre tema dinâmico: Buraco negro ---'
 adb logcat -c || true
-adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
+adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_DYNAMIC_VIDEO
 ready=0
 for i in $(seq 1 180); do
   sleep 5
@@ -65,4 +65,4 @@ ffprobe -v error -show_entries stream=codec_name,codec_type,width,height -of def
 ffprobe -v error -select_streams v -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q h264
 ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q aac
 test "$(stat -c%s teste/reel-gerado-no-android.mp4)" -gt 100000
-echo 'TESTE REAL OK: novo MP4 H.264 + AAC gerado e exportado pelo app Android.'
+echo 'TESTE REAL OK: MP4 H.264 + AAC gerado sobre assunto dinâmico pesquisado externamente.'
