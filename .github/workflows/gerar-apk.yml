@@ -1,10 +1,11 @@
 name: Gerar APK Curiosidades Reels
 on:
   push:
-    branches: [main]
+    branches: [main, feature/reels-crescimento-30dias]
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   compilar:
     runs-on: ubuntu-latest
@@ -23,7 +24,10 @@ jobs:
           tar --extract --xz --file=/tmp/helper-v3-patch.tar.xz
           python3 scripts/patch-tts.py
           python3 scripts/patch-captions-v4.py
+          python3 scripts/patch-growth.py
+          python3 scripts/test-growth.py
           python3 scripts/patch-smoke-codec.py
+          python3 scripts/patch-parallel-install.py
           test -f app/src/main/java/br/com/helper/reels/TrendFeed.java
           test -f app/src/main/java/br/com/helper/reels/FactCatalog.java
           test -f app/src/main/java/br/com/helper/reels/MainActivity.java
@@ -61,10 +65,15 @@ jobs:
           gradle-version: '8.9'
       - name: Compilar APK para Android
         run: gradle --no-daemon --stacktrace assembleDebug
+      - name: Conferir identificador real do APK NOVO
+        shell: bash
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk | grep -m1 '^package:'
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk | grep -m1 '^package:' | grep -q "name='br.com.helper.curiosidadesreels.nova'"
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Helper-Curiosidades-Reels-APK
+          name: Helper-Curiosidades-Reels-NOVO-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
@@ -76,8 +85,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: Helper-Curiosidades-Reels-APK
+          name: Helper-Curiosidades-Reels-NOVO-APK
           path: apk
+      - name: Baixar APK anterior para teste de convivencia
+        uses: actions/download-artifact@v4
+        with:
+          name: Helper-Curiosidades-Reels-APK
+          run-id: 43660823822
+          github-token: ${{ github.token }}
+          path: apk-anterior
       - name: Preparar Java
         uses: actions/setup-java@v4
         with:

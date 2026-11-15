@@ -5,10 +5,19 @@ echo '--- Estado do Android virtual ---'
 adb devices -l
 adb shell getprop ro.build.version.sdk
 adb shell pm list packages | grep -Ei 'tts|speech|googlequicksearch' || true
+adb install -r apk-anterior/app-debug.apk
+old_pkg=$(adb shell pm list packages -3 | tr -d '\r' | sed -n 's/^package://p' | head -1)
+test -n "$old_pkg" || { echo 'ERRO: pacote antigo nao encontrado'; exit 1; }
+echo "Pacote anterior: $old_pkg"
 adb install -r apk/app-debug.apk
+new_pkg="br.com.helper.curiosidadesreels.nova"
+test "$old_pkg" != "$new_pkg" || { echo 'ERRO: pacotes iguais'; exit 1; }
+adb shell pm list packages | tr -d '\r' | grep -Fx "package:$old_pkg"
+adb shell pm list packages | tr -d '\r' | grep -Fx "package:$new_pkg"
+echo "VERSOES CONVIVENDO: $old_pkg e $new_pkg"
 echo '--- Iniciando geração local de Reel ---'
 adb logcat -c || true
-adb shell am start -W -n br.com.helper.curiosidadesreels/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
+adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
 ready=0
 for i in $(seq 1 180); do
   sleep 5
