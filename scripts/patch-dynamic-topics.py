@@ -96,5 +96,12 @@ s=s.replace('        if(testMode){trends.setChecked(false);optionalTopic.setText
             }).start();
         }
         if(testMode){trends.setChecked(false);optionalTopic.setText("ciclone");generate();}''')
+s=s.replace('        if(testMode){trends.setChecked(false);optionalTopic.setText("ciclone");generate();}',
+'''        if("br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(getIntent().getAction())){
+            trends.setChecked(false);
+            optionalTopic.setText("Buraco negro");
+            generate();
+        }
+        if(testMode){trends.setChecked(false);optionalTopic.setText("ciclone");generate();}''')
 p.write_text(s,encoding="utf-8")
 print("Dynamic topic selection: live trends -> reviewed catalog OR sourced encyclopedia summary; no fabricated news claims")
