@@ -16,6 +16,8 @@ public class TrendSelectorTest {
     ok(a.trending,"A real trend must be selected on every press");
     ok(a.fact.key.equals("eclipse"),"Highest-ranked eligible trend must win");
     ok(a.trend.equals("Eclipse solar"),"Original RSS title must be retained");
+    FactCatalog.Selection en=FactCatalog.choose(Arrays.asList("El Niño","Campeonato"),1,"");
+    ok(en.trending && en.fact.key.equals("elnino"),"Relevant Brazilian climate trend must be selectable");
     FactCatalog.Selection b=FactCatalog.choose(Arrays.asList("Consolidação financeira"),3,"");
     ok(!b.trending,"Substring sol cannot be considered solar trend");
     FactCatalog.Selection c=FactCatalog.choose(Collections.emptyList(),5,"");
