@@ -50,6 +50,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           ffmpeg -version | head -1
+      - name: Diagnosticar referencias tecnicas no roteiro e renderizador
+        shell: bash
+        run: |
+          grep -nEi 'INMET|NOAA|FONTES|sources' cloud/gerar_reel.py | head -65
       - name: Instalar voz neural e renderer
         run: python -m pip install 'edge-tts>=7.3.0' pillow numpy
       - name: Gerar um Reels completo com audio, legendas e animacoes
