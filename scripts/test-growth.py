@@ -6,8 +6,8 @@ trends=Path("scripts/patch-trends.py").read_text(encoding="utf-8")
 workflow=Path(".github/workflows/gerar-apk.yml").read_text(encoding="utf-8")
 assert "f.title" in growth and "f.fact" in growth
 assert "callToAction" in growth and "HOOKS[Math.floorMod" not in growth
-assert "return matched.get(0)" in trends
-assert "if(!matched.isEmpty())" in trends
+assert "if(best!=null)return new Selection(best,t,true)" in trends
+assert "matchScore(f,clean)" in trends
 assert "java.util.regex.Pattern.quote" in trends
 assert "python3 scripts/patch-growth.py" in workflow
 assert "python3 scripts/patch-trends.py" in workflow
