@@ -1,27 +1,50 @@
 #!/usr/bin/env python3
-"""Prefer real Google Trends RSS matches; never label catalog fallback as trending."""
+"""Pick highest ranked Google Trends topic with best verified semantic match."""
 from pathlib import Path
 p=Path("app/src/main/java/br/com/helper/reels/FactCatalog.java")
 s=p.read_text(encoding="utf-8")
-start=s.index('        // Rotate through verified trends when available.')
-end=s.index('    static boolean matches(',start)
-replacement='''        // Google Trends RSS is ranked. Pick the highest ranked verified topic
-        // every time; do not silently replace two out of three trends with a
-        // generic catalog fact. Only rotate within equally eligible matches
-        // when their RSS titles are genuinely distinct.
-        if(!matched.isEmpty())
-            return matched.get(0);
-        // No safe semantic match: use a verified fallback, clearly NOT a trend.
-        Fact next=FACTS[Math.floorMod(historyCounter+3,FACTS.length)];
-        return new Selection(next,"",false);
+start=s.index('        if(requested != null && !requested.trim().isEmpty()){')
+end=s.index('    private FactCatalog(){}',start)
+replacement=r'''        if(requested != null && !requested.trim().isEmpty()){
+            String needle=fold(requested);
+            Fact best=null;int bestScore=0;
+            for(Fact f:FACTS){
+                int score=matchScore(f,needle);
+                if(score>bestScore){best=f;bestScore=score;}
+            }
+            return best==null?null:new Selection(best,"",false);
+        }
+        // RSS items are ranked: use the first eligible trend. Within that item,
+        // select the strongest phrase match rather than catalog declaration order.
+        if(trends!=null)for(String t:trends){
+            String clean=fold(t);
+            Fact best=null;int bestScore=0;
+            for(Fact f:FACTS){
+                int score=matchScore(f,clean);
+                if(score>bestScore){best=f;bestScore=score;}
+            }
+            if(best!=null)return new Selection(best,t,true);
+        }
+        // No verified relation to the live trends. Never claim a trend match.
+        Fact fallback=FACTS[Math.floorMod(historyCounter+3,FACTS.length)];
+        return new Selection(fallback,"",false);
+    }
+    static boolean matches(Fact fact,String text){return matchScore(fact,text)>0;}
+    static int matchScore(Fact fact,String text){
+        int best=0;
+        for(String tag:fact.tags.split(";")){
+            String normalized=fold(tag);
+            if(normalized.length()<3)continue;
+            String regex="(?:^|\\s)"+java.util.regex.Pattern.quote(normalized)+"(?:$|\\s)";
+            if(java.util.regex.Pattern.compile(regex).matcher(text).find()){
+                int score=normalized.length();
+                if(normalized.equals(text))score+=100;
+                if(score>best)best=score;
+            }
+        }
+        return best;
     }
 '''
 s=s[:start]+replacement+s[end:]
-old='''            if(text.contains(normalized))return true;'''
-new='''            // Whole words/phrases only: "sol" must not match "consolidação".
-            String pattern="(?:^|\\\\s)"+java.util.regex.Pattern.quote(normalized)+"(?:$|\\\\s)";
-            if(java.util.regex.Pattern.compile(pattern).matcher(text).find())return true;'''
-assert old in s
-s=s.replace(old,new)
 p.write_text(s,encoding="utf-8")
-print("TREND FIX: ranked verified RSS match first, strict token boundaries, honest fallback")
+print("TREND FIX: highest ranked eligible RSS item, strongest fact match, no false labels")
