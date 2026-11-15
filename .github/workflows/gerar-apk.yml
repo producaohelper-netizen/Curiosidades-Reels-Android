@@ -65,6 +65,11 @@ jobs:
           gradle-version: '8.9'
       - name: Compilar APK para Android
         run: gradle --no-daemon --stacktrace assembleDebug
+      - name: Conferir identificador real do APK NOVO
+        shell: bash
+        run: |
+          aapt dump badging app/build/outputs/apk/debug/app-debug.apk | grep -m1 '^package:'
+          aapt dump badging app/build/outputs/apk/debug/app-debug.apk | grep -m1 '^package:' | grep -q "name='br.com.helper.curiosidadesreels.nova'"
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
