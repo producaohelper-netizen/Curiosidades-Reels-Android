@@ -86,5 +86,15 @@ s=s.replace('                if(candidate==null)throw new Exception', '''       
                     candidate=DynamicTopic.choose(java.util.Collections.singletonList(requested),new java.util.HashSet<String>());
                 if(candidate==null)throw new Exception''')
 s=s.replace('                final String explain=choice.trending?', '                final FactCatalog.Selection choice=candidate;\n                final String explain=choice.trending?')
+s=s.replace('        if(testMode){trends.setChecked(false);optionalTopic.setText("ciclone");generate();}', '''        if("br.com.helper.reels.TEST_DYNAMIC_LOOKUP".equals(getIntent().getAction())){
+            new Thread(()->{
+                FactCatalog.Selection test=DynamicTopic.choose(
+                    java.util.Collections.singletonList("Buraco negro"),new java.util.HashSet<String>());
+                if(test!=null && test.fact.fact.length()>100 && test.fact.sourceUrl.startsWith("https://"))
+                    android.util.Log.i("HelperDynamicTest","PASS: "+test.fact.title+" | "+test.fact.sourceUrl);
+                else android.util.Log.e("HelperDynamicTest","FAIL: no sourced script for Buraco negro");
+            }).start();
+        }
+        if(testMode){trends.setChecked(false);optionalTopic.setText("ciclone");generate();}''')
 p.write_text(s,encoding="utf-8")
 print("Dynamic topic selection: live trends -> reviewed catalog OR sourced encyclopedia summary; no fabricated news claims")
