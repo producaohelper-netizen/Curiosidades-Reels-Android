@@ -56,3 +56,15 @@ replacement=r'''        if(requested != null && !requested.trim().isEmpty()){
 s=s[:start]+replacement+s[end:]
 p.write_text(s,encoding="utf-8")
 print("TREND FIX: highest ranked eligible RSS item, strongest fact match, no false labels")
+
+feed=Path("app/src/main/java/br/com/helper/reels/TrendFeed.java")
+t=feed.read_text(encoding="utf-8")
+t=t.replace('HelperCuriosidadesReels/3.0 (Android; RSS reader)',
+            'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36')
+t=t.replace('conn.setConnectTimeout(7000);conn.setReadTimeout(9000);',
+            'conn.setConnectTimeout(10000);conn.setReadTimeout(12000);\n        conn.setRequestProperty("Accept","application/rss+xml, application/xml, text/xml");')
+assert '        return topics;' in t
+t=t.replace('        return topics;',
+            '        android.util.Log.i("HelperTrends","Google Trends BR: "+topics.size()+" assuntos recebidos");\n        return topics;')
+feed.write_text(t,encoding="utf-8")
+print("TREND FEED: XML Accept, Android browser User-Agent and topic count logging")
