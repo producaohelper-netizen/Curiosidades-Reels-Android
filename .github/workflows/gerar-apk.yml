@@ -30,6 +30,8 @@ jobs:
           python3 scripts/patch-dynamic-topics.py
           python3 scripts/test-trends-runtime.py
           python3 scripts/test-growth.py
+          python3 scripts/test-editorial-30dias.py
+          python3 scripts/editorial-30dias.py
           python3 scripts/patch-smoke-codec.py
           python3 scripts/patch-parallel-install.py
           test -f app/src/main/java/br/com/helper/reels/TrendFeed.java
