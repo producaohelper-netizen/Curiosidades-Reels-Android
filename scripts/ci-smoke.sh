@@ -15,6 +15,20 @@ test "$old_pkg" != "$new_pkg" || { echo 'ERRO: pacotes iguais'; exit 1; }
 adb shell pm list packages | tr -d '\r' | grep -Fx "package:$old_pkg"
 adb shell pm list packages | tr -d '\r' | grep -Fx "package:$new_pkg"
 echo "VERSOES CONVIVENDO: $old_pkg e $new_pkg"
+echo '--- Consultando fonte externa no Android virtual: Buraco negro ---'
+adb logcat -c || true
+adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_DYNAMIC_LOOKUP
+lookup=0
+for i in $(seq 1 18); do
+  sleep 3
+  if adb logcat -d -s HelperDynamicTest:I 2>/dev/null | grep -q 'PASS:'; then lookup=1; break; fi
+  if adb logcat -d -s HelperDynamicTest:E 2>/dev/null | grep -q 'FAIL:'; then break; fi
+done
+adb logcat -d -s HelperDynamicTest:I HelperDynamicTest:E | tail -12 || true
+if (( lookup == 0 )); then
+  echo 'FALHA: consulta externa dinâmica não validada no Android'
+  exit 1
+fi
 echo '--- Iniciando geração local de Reel ---'
 adb logcat -c || true
 adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
