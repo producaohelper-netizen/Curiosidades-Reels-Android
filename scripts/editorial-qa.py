@@ -17,6 +17,11 @@ checks={
  "fact sources present":len(meta.get("fact_sources",[]))>=1,
  "caption includes account": "@curiosidades.infinitas.nv" in post.get("caption",""),
  "caption and title present":bool(post.get("caption") and post.get("cover_title")),
+ "non-generic opening":not post.get("caption","").strip().lower().startswith(("você sabia?","voce sabia?","sabia disso?")),
+ "no spelling mistake": "sabiá disso" not in post.get("caption","").lower(),
+ "sources internal only": not any(x in post.get("caption","").lower() for x in ("mit news","universidade de rochester","fontes:")),
+ "relevant action request":any(x in post.get("caption","").lower() for x in ("envie","salve","comente","comentários")),
+ "focused hashtags": 2<=len(post.get("hashtags",[]))<=6,
 }
 result={"checks":checks,"duration_s":duration,"approved":all(checks.values()),"note":"Automated checks do not replace human review of accuracy, imagery, licensing or natural narration."}
 (base/"editorial-qa.json").write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
