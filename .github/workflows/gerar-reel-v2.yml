@@ -93,9 +93,16 @@ jobs:
             produced/editorial-qa.json
           retention-days: 30
       - name: Publicar ultimo Reel para o Android
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('produced/editorial-qa.json')
+          assert p.exists() and json.loads(p.read_text())['approved'], 'Reel reprovado na auditoria editorial; nao publicar'
+          PY
           git config user.name 'Helper Reels Bot'
           git config user.email 'actions@users.noreply.github.com'
           git add produced/latest.mp4 produced/latest.json produced/test-result.json
