@@ -6,8 +6,7 @@ on:
       - 'cloud/**'
       - '.github/workflows/gerar-reel-v2.yml'
   schedule:
-    - cron: '12 12 * * *'
-    - cron: '12 23 * * *'
+    - cron: '12 15 * * *'
 permissions:
   contents: write
 jobs:
