@@ -9,6 +9,7 @@ sample={"title":"Uma história documentada","pillar":"historia_real","source_pri
 assert m.validate(sample,set())[0]
 assert not m.validate(sample,{"uma historia documentada"})[0]
 assert not m.validate(dict(sample,source_confirmation=sample["source_primary"]),set())[0]
+assert not m.validate(dict(sample,source_confirmation="https://other.example.org/confirm"),set())[0]
 assert not m.validate(dict(sample,is_sensitive=True),set())[0]
 result=m.plan([sample],days=30,start=date(2026,11,15))
 assert len(result["scheduled"])==30
