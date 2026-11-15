@@ -4,7 +4,7 @@ from datetime import date
 s=importlib.util.spec_from_file_location("editorial","scripts/editorial-30dias.py")
 m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
 assert sum(m.allocation().values())==30
-assert m.allocation()=={"historia_real":10,"ciencia_natureza":9,"misterios_documentados":6,"cotidiano":5}
+assert m.allocation()=={"historia_real":11,"ciencia_natureza":9,"misterios_documentados":6,"cotidiano":4}
 sample={"title":"Uma história documentada","pillar":"historia_real","source_primary":"https://example.org/primary","source_confirmation":"https://example.net/confirm","facts":["Um fato"],"hook":"O que aconteceu?","reveal":"Aqui está a resposta","cta":"Compartilhe","confidence":"high","claim_status":"documented"}
 assert m.validate(sample,set())[0]
 assert not m.validate(sample,{"uma historia documentada"})[0]
