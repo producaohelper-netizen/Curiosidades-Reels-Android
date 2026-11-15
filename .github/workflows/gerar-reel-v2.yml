@@ -61,6 +61,8 @@ jobs:
         run: python scripts/normalize-duration.py
       - name: Preparar legenda e serie para Instagram
         run: python scripts/prepare-instagram.py
+      - name: Adaptar publicacao para publico leigo
+        run: python scripts/audience-editorial.py
       - name: Testar o video REAL exportado
         shell: bash
         run: |
