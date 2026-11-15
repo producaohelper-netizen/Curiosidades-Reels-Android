@@ -54,7 +54,7 @@ public final class DynamicTopic {
                 int stop=factual.lastIndexOf(". ");
                 if(stop>180)factual=factual.substring(0,stop+1);
                 String headline="ENTENDA: "+article.toUpperCase(Locale.ROOT);
-                String script="Por que "+article+" está chamando atenção? "+factual+
+                String script="O que você precisa saber sobre "+article+"? "+factual+
                     " O que mais você gostaria de saber sobre esse assunto? Comente!";
                 FactCatalog.Fact fact=new FactCatalog.Fact("trend:"+key,headline,key,script,
                     "Wikipédia (resumo enciclopédico; não confirma notícias recentes)",source,"earth");
