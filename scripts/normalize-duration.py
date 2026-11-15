@@ -31,6 +31,16 @@ elif 35<duration<=49:
  import hashlib
  meta["video_sha256"]=hashlib.sha256(mp4.read_bytes()).hexdigest()
  meta_file.write_text(json.dumps(meta,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+ timing_file=root/"timings.json"
+ if timing_file.exists():
+  timing=json.loads(timing_file.read_text(encoding="utf-8"))
+  for segment in timing.get("segments",[]):
+   for key in ("start","end"):
+    if isinstance(segment.get(key),(int,float)):segment[key]=round(segment[key]/speed,4)
+  for word in timing.get("words",[]):
+   for key in ("t","end","start"):
+    if isinstance(word.get(key),(int,float)):word[key]=round(word[key]/speed,4)
+  timing_file.write_text(json.dumps(timing,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
  print(f"Retimed {duration:.2f}s -> {new_duration:.2f}s ({speed:.3f}x)")
 else:
  raise SystemExit(f"Duration {duration:.2f}s cannot safely be brought to 15-35s; revise the script instead")
