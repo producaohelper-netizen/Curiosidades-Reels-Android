@@ -22,15 +22,11 @@ jobs:
           cat source3/part-{01..05}.txt | base64 --decode > /tmp/helper-v3-patch.tar.xz
           echo "389905dae91c28bf318dc4772c9cf7c442aae696ac4b0ff2c51d4c603aab306c  /tmp/helper-v3-patch.tar.xz" | sha256sum --check
           tar --extract --xz --file=/tmp/helper-v3-patch.tar.xz
-          echo '--- TREND FEED SOURCE ---'
-          sed -n '1,240p' app/src/main/java/br/com/helper/reels/TrendFeed.java
-          echo '--- FACT CATALOG SOURCE ---'
-          sed -n '1,180p' app/src/main/java/br/com/helper/reels/FactCatalog.java
-          echo '--- SCRIPT BUILDER SOURCE ---'
-          sed -n '1,160p' app/src/main/java/br/com/helper/reels/ScriptBuilder.java
           python3 scripts/patch-tts.py
           python3 scripts/patch-captions-v4.py
           python3 scripts/patch-growth.py
+          python3 scripts/patch-trends.py
+          python3 scripts/test-trends-runtime.py
           python3 scripts/test-growth.py
           python3 scripts/patch-smoke-codec.py
           python3 scripts/patch-parallel-install.py
