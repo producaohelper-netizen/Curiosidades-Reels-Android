@@ -3,6 +3,13 @@
 from pathlib import Path
 p=Path("app/src/main/java/br/com/helper/reels/FactCatalog.java")
 s=p.read_text(encoding="utf-8")
+anchor="    };\n    public static String fold(String s) {"
+assert anchor in s
+addition='''        ,new Fact("elnino","POR QUE O EL NIÑO MUDA O TEMPO?","el nino;el niño;elnino",
+            "O El Niño acontece quando uma parte do Oceano Pacífico fica mais quente que o normal. Essa mudança mexe com ventos e chuvas em várias regiões do mundo. No Brasil, os efeitos variam conforme a região e o ano. É como mudar uma peça do quebra-cabeça do clima: outras peças também se mexem.",
+            "NOAA Climate.gov","https://www.climate.gov/enso","weather")
+'''
+s=s.replace(anchor,addition+anchor,1)
 start=s.index('        if(requested != null && !requested.trim().isEmpty()){')
 end=s.index('    private FactCatalog(){}',start)
 replacement=r'''        if(requested != null && !requested.trim().isEmpty()){
