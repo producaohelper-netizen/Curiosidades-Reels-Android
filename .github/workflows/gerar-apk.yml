@@ -26,6 +26,7 @@ jobs:
           python3 scripts/patch-growth.py
           python3 scripts/test-growth.py
           python3 scripts/patch-smoke-codec.py
+          python3 scripts/patch-parallel-install.py
           test -f app/src/main/java/br/com/helper/reels/TrendFeed.java
           test -f app/src/main/java/br/com/helper/reels/FactCatalog.java
           test -f app/src/main/java/br/com/helper/reels/MainActivity.java
@@ -66,7 +67,7 @@ jobs:
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Helper-Curiosidades-Reels-APK
+          name: Helper-Curiosidades-Reels-NOVO-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
@@ -78,7 +79,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: Helper-Curiosidades-Reels-APK
+          name: Helper-Curiosidades-Reels-NOVO-APK
           path: apk
       - name: Preparar Java
         uses: actions/setup-java@v4
