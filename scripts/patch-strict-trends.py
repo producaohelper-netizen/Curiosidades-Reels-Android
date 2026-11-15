@@ -13,11 +13,10 @@ addition='''    // Strict mode: only verified RSS matches that were never genera
             String clean=fold(t);
             Fact best=null;int score=0;
             for(Fact f:FACTS){
-                if(used!=null && used.contains(f.key))continue;
                 int value=matchScore(f,clean);
                 if(value>score){best=f;score=value;}
             }
-            if(best!=null)return new Selection(best,t,true);
+            if(best!=null && (used==null || !used.contains(best.key)))return new Selection(best,t,true);
         }
         return null;
     }
