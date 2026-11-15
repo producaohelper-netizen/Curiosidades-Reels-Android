@@ -12,7 +12,13 @@ if gradle.suffix==".kts":
 else:
  pattern=r'(applicationId\s+")[^"]+(")'
 s,n=re.subn(pattern,r'\g<1>br.com.helper.curiosidadesreels.nova\2',s)
-assert n==1,f"Expected one applicationId, found {n}"
+if n==0:
+ # Some archived Android sources derive applicationId from namespace; add it explicitly.
+ if gradle.suffix==".kts":
+  s,n=re.subn(r"(defaultConfig\s*\{)",'\\1\n        applicationId = "br.com.helper.curiosidadesreels.nova"',s,count=1)
+ else:
+  s,n=re.subn(r"(defaultConfig\s*\{)",'\\1\n        applicationId "br.com.helper.curiosidadesreels.nova"',s,count=1)
+assert n==1,f"Expected one applicationId or defaultConfig block, found {n}"
 gradle.write_text(s,encoding="utf-8")
 manifest=Path("app/src/main/AndroidManifest.xml")
 m=manifest.read_text(encoding="utf-8")
