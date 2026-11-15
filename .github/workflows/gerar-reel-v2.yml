@@ -76,6 +76,9 @@ jobs:
           assert any(s['codec_type']=='audio' for s in probe['streams']), probe
           print('VALIDADO: narracao neural, alinhamento palavra a palavra, animacoes, exportacao 9:16, fontes.')
           PY
+      - name: Auditoria editorial de publicacao (nao bloqueia arquivo de diagnostico)
+        continue-on-error: true
+        run: python scripts/editorial-qa.py
       - name: Guardar video e prova de qualidade
         uses: actions/upload-artifact@v4
         with:
@@ -87,6 +90,7 @@ jobs:
             produced/timings.json
             produced/instagram-post.json
             produced/instagram-legenda.txt
+            produced/editorial-qa.json
           retention-days: 30
       - name: Publicar ultimo Reel para o Android
         shell: bash
