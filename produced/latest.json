@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "created_at": "2026-11-15T03:10:17.046367+00:00",
+  "created_at": "2026-11-15T16:31:27.942776+00:00",
   "title": "UM CICLONE GIRA AO CONTRÁRIO?",
   "category": "CIÊNCIA DO TEMPO",
-  "trend": null,
-  "trend_confirmed": false,
+  "trend": "tornado",
+  "trend_confirmed": true,
   "trend_source": "https://trends.google.com/trending/rss?geo=BR",
   "trend_feed_error": null,
   "fact_sources": [
@@ -26,7 +26,7 @@
   "frames_rendered": 925,
   "caption_words": 106,
   "scenes": 11,
-  "video_sha256": "d53c9a8d5e6506f4c7c80fc2ecfe22881bb3c67a8e3495ba2722aaeb8868c2fc",
+  "video_sha256": "4df9d91c5f169fa1a0a3c65b7862c08e9326dcae713e7fae7f1cbbf13de1fbf8",
   "claim": "Google Trends sinaliza procura, não valida fatos. Roteiro pré-revisado com fontes específicas.",
   "retime_speed": 1.3403,
   "retime_note": "Video, spoken audio and burned-in captions sped up together",
