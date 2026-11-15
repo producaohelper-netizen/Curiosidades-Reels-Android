@@ -18,6 +18,16 @@ public class TrendSelectorTest {
     ok(a.trend.equals("Eclipse solar"),"Original RSS title must be retained");
     FactCatalog.Selection en=FactCatalog.choose(Arrays.asList("El Niño","Campeonato"),1,"");
     ok(en.trending && en.fact.key.equals("elnino"),"Relevant Brazilian climate trend must be selectable");
+    java.util.Set<String> used=new java.util.HashSet<>();
+    FactCatalog.Selection fresh=FactCatalog.chooseFresh(Arrays.asList("Eclipse solar","El Niño"),used);
+    ok(fresh!=null && fresh.fact.key.equals("eclipse"),"Strict mode picks top eligible trend");
+    used.add("eclipse");
+    FactCatalog.Selection second=FactCatalog.chooseFresh(Arrays.asList("Eclipse solar","El Niño"),used);
+    ok(second!=null && second.fact.key.equals("elnino"),"Strict mode skips previously used fact");
+    used.add("elnino");
+    ok(FactCatalog.chooseFresh(Arrays.asList("Eclipse solar","El Niño"),used)==null,"No repeats after all eligible trends are used");
+    ok(FactCatalog.chooseFresh(Arrays.asList("Campeonato de futebol"),new java.util.HashSet<>())==null,"Unrelated trend must not generate catalog content");
+    ok(FactCatalog.chooseFresh(Collections.emptyList(),new java.util.HashSet<>())==null,"Empty feed must not generate catalog content");
     FactCatalog.Selection b=FactCatalog.choose(Arrays.asList("Consolidação financeira"),3,"");
     ok(!b.trending,"Substring sol cannot be considered solar trend");
     FactCatalog.Selection c=FactCatalog.choose(Collections.emptyList(),5,"");
