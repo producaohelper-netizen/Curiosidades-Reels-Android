@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   compilar:
     runs-on: ubuntu-latest
@@ -81,6 +82,13 @@ jobs:
         with:
           name: Helper-Curiosidades-Reels-NOVO-APK
           path: apk
+      - name: Baixar APK anterior para teste de convivencia
+        uses: actions/download-artifact@v4
+        with:
+          name: Helper-Curiosidades-Reels-APK
+          run-id: 43660823822
+          github-token: ${{ github.token }}
+          path: apk-anterior
       - name: Preparar Java
         uses: actions/setup-java@v4
         with:
