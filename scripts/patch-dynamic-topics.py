@@ -82,6 +82,9 @@ s=s.replace('FactCatalog.Selection choice=(fetchTrends&&requested.isEmpty())','F
 s=s.replace('&&choice==null)','&&candidate==null)')
 s=s.replace('choice=DynamicTopic.choose(titles,usedKeys);','candidate=DynamicTopic.choose(titles,usedKeys);')
 s=s.replace('if(choice==null)throw new Exception','if(candidate==null)throw new Exception')
+s=s.replace('                if(candidate==null)throw new Exception', '''                if(candidate==null&&!requested.isEmpty())
+                    candidate=DynamicTopic.choose(java.util.Collections.singletonList(requested),new java.util.HashSet<String>());
+                if(candidate==null)throw new Exception''')
 s=s.replace('                final String explain=choice.trending?', '                final FactCatalog.Selection choice=candidate;\\n                final String explain=choice.trending?')
 p.write_text(s,encoding="utf-8")
 print("Dynamic topic selection: live trends -> reviewed catalog OR sourced encyclopedia summary; no fabricated news claims")
