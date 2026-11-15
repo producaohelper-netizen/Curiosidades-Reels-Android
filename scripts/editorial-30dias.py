@@ -4,6 +4,7 @@ import argparse,csv,json,re,unicodedata
 from collections import Counter
 from datetime import date,timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 PILLARS=[
  ("historia_real",35,"Histórias reais que parecem ficção"),
  ("ciencia_natureza",30,"O lado estranho da ciência"),
@@ -21,6 +22,12 @@ def validate(item,used):
  if key(item["title"]) in used:return False,"duplicate_title"
  if item["source_primary"].strip()==item["source_confirmation"].strip():return False,"same_source"
  if not all(str(item[x]).startswith("https://") for x in ("source_primary","source_confirmation")):return False,"invalid_source_url"
+ # A pair of Wikipedia language subdomains is still one publisher.
+ hosts=[urlparse(item[x]).hostname or "" for x in ("source_primary","source_confirmation")]
+ def publisher(host):
+  parts=host.lower().split(".")
+  return ".".join(parts[-2:]) if len(parts)>1 else host
+ if not all(hosts) or publisher(hosts[0])==publisher(hosts[1]):return False,"sources_not_independent"
  if item.get("confidence") not in ("high","medium"):return False,"confidence_not_verified"
  if item.get("claim_status") not in ("documented","scientifically_supported"):return False,"unsupported_claim"
  if item.get("is_sensitive") and not item.get("human_review"):return False,"sensitive_requires_review"
