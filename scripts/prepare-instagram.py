@@ -17,7 +17,7 @@ def pillar(s):
     if any(w in x for w in ("universo","astronomia","espaco","lua","planeta","cosmo")):return "Universo em 30 segundos"
     if any(w in x for w in ("historia","historico","antiguidade")):return "História que parece mentira"
     if any(w in x for w in ("ciencia","fisica","quimica","tempo","meteorologia")):return "Ciência sem complicação"
-    return "Você sabia?"
+    return "Fatos que surpreendem"
 series=pillar(category+" "+title)
 keywords=[w.lower() for w in re.findall(r"\w+",title,flags=re.UNICODE) if len(w)>3][:5]
 tags=["#curiosidades","#ciencia"]
@@ -25,10 +25,16 @@ if series.startswith("Universo"):tags+=["#universo","#astronomia"]
 elif series.startswith("História"):tags+=["#historia","#fatoshistoricos"]
 elif series.startswith("Ciência"):tags+=["#cienciaexplicada","#aprendizado"]
 else:tags+=["#voceSabia","#fatos"]
-description=(f"{title.capitalize()}? Descubra a explicação neste Reel.\n\n"
-    f"Você já sabia? Conte nos comentários, salve para lembrar e compartilhe com alguém curioso. "
-    f"Siga @curiosidades.infinitas.nv para descobrir algo novo todos os dias.\n\n"
-    + " ".join(tags))
+# Make the caption searchable and relevant to the actual subject; avoid generic hooks.
+subject=title[0].upper()+title[1:] if title else "Curiosidade"
+subject=subject.rstrip("?! .")
+cta=("Envie para alguém que adora curiosidades do espaço." if series.startswith("Universo")
+     else "Salve para contar essa curiosidade depois." if series.startswith("História")
+     else "Qual parte mais surpreendeu você? Conte nos comentários.")
+description=(f"{subject}.\\n\\n"
+    f"Neste vídeo de {series.lower()}, descubra o que acontece e por quê, em linguagem simples.\\n\\n"
+    f"{cta} Siga @curiosidades.infinitas.nv para descobrir algo novo todos os dias.\\n\\n"
+    + " ".join(dict.fromkeys(tags)))
 assets={"series":series,"cover_title":meta["title"],"caption":description,
         "keywords":keywords,"hashtags":tags,"duration_s":duration,
         "recommended_duration_s":[15,35],
