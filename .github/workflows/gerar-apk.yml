@@ -23,6 +23,8 @@ jobs:
           tar --extract --xz --file=/tmp/helper-v3-patch.tar.xz
           python3 scripts/patch-tts.py
           python3 scripts/patch-captions-v4.py
+          python3 scripts/patch-growth.py
+          python3 scripts/test-growth.py
           python3 scripts/patch-smoke-codec.py
           test -f app/src/main/java/br/com/helper/reels/TrendFeed.java
           test -f app/src/main/java/br/com/helper/reels/FactCatalog.java
