@@ -1,31 +1,29 @@
 {
   "version": 2,
-  "created_at": "2026-11-15T00:58:20.061233+00:00",
-  "title": "UM CICLONE GIRA AO CONTRÁRIO?",
-  "category": "CIÊNCIA DO TEMPO",
-  "trend": null,
-  "trend_confirmed": false,
+  "created_at": "2026-11-15T01:28:32.772188+00:00",
+  "title": "POR QUE A BOLA FAZ CURVA NO FUTEBOL?",
+  "category": "FÍSICA NO FUTEBOL",
+  "trend": "seleção mexicana de futebol",
+  "trend_confirmed": true,
   "trend_source": "https://trends.google.com/trending/rss?geo=BR",
   "trend_feed_error": null,
   "fact_sources": [
     {
-      "name": "INMET",
-      "url": "https://portal.inmet.gov.br/glossario/tempo"
+      "name": "MIT News",
+      "url": "https://news.mit.edu/2014/explained-how-does-soccer-ball-swerve-0617"
     },
     {
-      "name": "NOAA",
-      "url": "https://www.nesdis.noaa.gov/about/k-12-education/atmosphere/what-the-coriolis-effect"
-    },
-    {
-      "name": "NOAA — mito do ralo",
-      "url": "https://www.aoml.noaa.gov/hrd/tcfaq/F2.html"
+      "name": "Universidade de Rochester",
+      "url": "https://www.rochester.edu/newscenter/what-is-magnus-effect-definition-how-to-curve-soccer-ball-709592/"
     }
   ],
   "narrator": "pt-BR-FranciscaNeural",
-  "duration_s": 46.24,
-  "frames_rendered": 925,
-  "caption_words": 106,
-  "scenes": 11,
-  "video_sha256": "534872a0b7d8f3b4f6f0bd6bdb738e6977d2679b1f3c1b326f1664ae977077be",
-  "claim": "Google Trends sinaliza procura, não valida fatos. Roteiro pré-revisado com fontes específicas."
+  "duration_s": 34.533,
+  "frames_rendered": 732,
+  "caption_words": 83,
+  "scenes": 8,
+  "video_sha256": "470fc11141658844bb76af029b0af29c0b73756b2452fdecd64e9cf3c58cad1e",
+  "claim": "Google Trends sinaliza procura, não valida fatos. Roteiro pré-revisado com fontes específicas.",
+  "retime_speed": 1.0601,
+  "retime_note": "Video, spoken audio and burned-in captions sped up together"
 }
