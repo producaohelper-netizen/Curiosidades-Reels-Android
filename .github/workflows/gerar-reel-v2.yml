@@ -57,6 +57,8 @@ jobs:
         env:
           REELS_VOICE: pt-BR-FranciscaNeural
           OUTPUT_DIR: produced
+      - name: Ajustar duracao com audio e legendas sincronizados
+        run: python scripts/normalize-duration.py
       - name: Preparar legenda e serie para Instagram
         run: python scripts/prepare-instagram.py
       - name: Testar o video REAL exportado
