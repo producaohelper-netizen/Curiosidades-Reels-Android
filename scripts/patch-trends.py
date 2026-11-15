@@ -38,6 +38,7 @@ replacement=r'''        if(requested != null && !requested.trim().isEmpty()){
             String regex="(?:^|\\s)"+java.util.regex.Pattern.quote(normalized)+"(?:$|\\s)";
             if(java.util.regex.Pattern.compile(regex).matcher(text).find()){
                 int score=normalized.length();
+                if(normalized.equals(fact.key))score+=50;
                 if(normalized.equals(text))score+=100;
                 if(score>best)best=score;
             }
