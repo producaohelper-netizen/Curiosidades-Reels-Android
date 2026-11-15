@@ -6,9 +6,11 @@ adb devices -l
 adb shell getprop ro.build.version.sdk
 adb shell pm list packages | grep -Ei 'tts|speech|googlequicksearch' || true
 adb install -r apk/app-debug.apk
+adb shell pm list packages | grep -q 'package:br.com.helper.curiosidadesreels.nova'
+echo 'Instalacao independente: pacote NOVO confirmado'
 echo '--- Iniciando geração local de Reel ---'
 adb logcat -c || true
-adb shell am start -W -n br.com.helper.curiosidadesreels/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
+adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
 ready=0
 for i in $(seq 1 180); do
   sleep 5
