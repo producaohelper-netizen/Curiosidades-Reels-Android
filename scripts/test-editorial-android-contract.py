@@ -33,3 +33,11 @@ assert 'queue.length()>30' in s
 assert 'exported.contains(candidateKey)' in s
 assert 'Todas as histórias da fila já foram exportadas' in s
 print("Multi-story editorial queue selection contract PASS")
+
+assert 'new java.io.File(context.getFilesDir(),"editorial-approved.json")' in s
+assert 'ACTION_OPEN_DOCUMENT' in main
+assert 'startActivityForResult(pick,7421)' in main
+assert 'EditorialQueue.load(getApplicationContext())' in main
+assert 'editorial-backup.json' in main
+assert 'Importação rejeitada' in main
+print("Android editorial JSON import and rollback contract PASS")
