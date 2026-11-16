@@ -22,7 +22,9 @@ new='''                NarrationEngine.PcmAudio voice;
                         CaptionTimeline.build(story.narration,java.util.Collections.emptyList(),hz,6));
                     android.util.Log.i("HelperReels","CI codec smoke: audio de teste não é narração TTS");
                 } else {
+                    android.util.Log.i("HelperTTS","REAL_SYNTHESIS_BEGIN");
                     voice=NarrationEngine.synthesize(getApplicationContext(),story.narration);
+                    android.util.Log.i("HelperTTS","REAL_SYNTHESIS_COMPLETE");
                 }'''
 assert old in s,"voice marker missing"
 s=s.replace(old,new)
