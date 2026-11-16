@@ -17,3 +17,7 @@ assert "Pauta editorial obrigatória" in main
 assert "choice=EditorialQueue.load(getApplicationContext())" in main
 assert "Pauta editorial obrigatória" in main
 print("Public generation gate PASS")
+
+builder=Path("app/src/main/java/br/com/helper/reels/ScriptBuilder.java").read_text(encoding="utf-8")
+assert 'f.key.startsWith("editorial:") ? f.fact' in builder, "Approved narration must not be rewritten"
+print("Reviewed narration preservation PASS")
