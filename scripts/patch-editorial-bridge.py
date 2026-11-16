@@ -30,6 +30,22 @@ public final class EditorialQueue {
             String source=sources.getString(0),confirmation=sources.getString(1);
             if(!source.startsWith("https://")||!confirmation.startsWith("https://")||source.equals(confirmation))
                 throw new Exception("Fontes inválidas");
+            if(obj.optString("reviewer","").trim().isEmpty() || obj.optString("reviewed_at","").trim().isEmpty())
+                throw new Exception("Revisão editorial sem responsável e data");
+            org.json.JSONArray media=obj.optJSONArray("assets");
+            if(media==null||media.length()==0)throw new Exception("Pauta sem mídia revisada");
+            for(int i=0;i<media.length();i++){
+                JSONObject scene=media.getJSONObject(i);
+                String license=scene.optString("license","");
+                if(!java.util.Arrays.asList("original","public_domain","cc0","cc_by","licensed").contains(license)
+                    ||scene.optString("scene_text","").isEmpty()
+                    ||scene.optString("description","").isEmpty())
+                    throw new Exception("Cena sem licença ou descrição");
+                if(!"original".equals(license)&&!scene.optString("source_url","").startsWith("https://"))
+                    throw new Exception("Cena sem origem da mídia");
+                if("cc_by".equals(license)&&scene.optString("attribution","").isEmpty())
+                    throw new Exception("Crédito obrigatório da mídia ausente");
+            }
             String pillar=obj.optString("pillar","");
             if(!java.util.Arrays.asList("historia_real","ciencia_natureza","misterios_documentados","cotidiano").contains(pillar))
                 throw new Exception("Pilar fora do plano");
