@@ -114,6 +114,9 @@ s=s.replace(worker,'''                final FactCatalog.Selection choice;
                 }else{
                     choice=EditorialQueue.load(getApplicationContext());
                     if(choice==null)throw new Exception("Nenhuma pauta editorial aprovada disponível");
+                    String previous=getPreferences(0).getString("last_editorial_key","");
+                    if(choice.fact.key.equals(previous))
+                        throw new Exception("Esta história já foi exportada. Carregue uma nova pauta revisada.");
                 }''',1)
 # Ensure an approved story can be selected even when the legacy catalog has no match.
 # This is a textual substitution, not a broad regex over the Java method.
@@ -121,6 +124,13 @@ guard_text="if(candidate==null)throw new Exception"
 assert s.count(guard_text)==1, "Legacy candidate guard changed"
 s=s.replace(guard_text,'''if(candidate==null && ("br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(getIntent().getAction())
                     || "br.com.helper.reels.TEST_GENERATION".equals(getIntent().getAction())))throw new Exception''',1)
+# Record the editorial ID only after a successful MediaStore publication.
+# A failed render must never consume a reviewed story.
+published='                getContentResolver().update(uri,ok,null,null);'
+assert published in s, "MP4 publication marker changed"
+s=s.replace(published,published+'''
+                if(choice.fact.key.startsWith("editorial:"))
+                    getPreferences(0).edit().putString("last_editorial_key",choice.fact.key).apply();''',1)
 p.write_text(s,encoding="utf-8")
 # Editorial scripts already contain a reviewed hook, reveal and CTA. Do not
 # append the legacy generic hook and CTA a second time.
