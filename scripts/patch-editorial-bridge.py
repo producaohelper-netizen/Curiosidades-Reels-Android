@@ -46,6 +46,9 @@ public final class EditorialQueue {
                 if("cc_by".equals(license)&&scene.optString("attribution","").isEmpty())
                     throw new Exception("Crédito obrigatório da mídia ausente");
             }
+            java.net.URI first=new java.net.URI(source),second=new java.net.URI(confirmation);
+            if(first.getHost()==null||second.getHost()==null||first.getHost().equalsIgnoreCase(second.getHost()))
+                throw new Exception("Fontes devem ter origens diferentes");
             String pillar=obj.optString("pillar","");
             if(!java.util.Arrays.asList("historia_real","ciencia_natureza","misterios_documentados","cotidiano").contains(pillar))
                 throw new Exception("Pilar fora do plano");
