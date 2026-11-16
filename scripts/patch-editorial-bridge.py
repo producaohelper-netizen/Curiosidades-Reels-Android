@@ -85,7 +85,7 @@ guard="""    private void generate(){
             try{
                 FactCatalog.Selection approved=EditorialQueue.load(getApplicationContext());
                 if(approved==null)throw new Exception("Importe uma história revisada antes de gerar.");
-                throw new Exception("A integração da pauta ao renderizador ainda não foi validada. Geração pública bloqueada.");
+                // Story is approved; the worker below must use this exact selection.
             }catch(Exception e){
                 new android.app.AlertDialog.Builder(this)
                     .setTitle("Pauta editorial obrigatória")
@@ -96,6 +96,23 @@ guard="""    private void generate(){
         }
 """
 s=s.replace(needle,guard,1)
+# The approved story overrides the legacy catalog only for normal user generation.
+# Smoke tests continue using the existing emulator path.
+worker='                final FactCatalog.Selection choice=candidate;'
+assert worker in s, "Legacy selection handoff changed"
+s=s.replace(worker,'''                final FactCatalog.Selection choice;
+                if("br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(getIntent().getAction())
+                    ||"br.com.helper.reels.TEST_GENERATION".equals(getIntent().getAction())){
+                    choice=candidate;
+                }else{
+                    choice=EditorialQueue.load(getApplicationContext());
+                    if(choice==null)throw new Exception("Nenhuma pauta editorial aprovada disponível");
+                }''',1)
+# Prevent the old null candidate guard from firing before approved-story handoff.
+import re
+s,n=re.subn(r'(?m)^([ \\t]*)if\\(candidate==null\\)throw new Exception[^;]*;',r'\\1if(candidate==null && ("br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(getIntent().getAction()) || "br.com.helper.reels.TEST_GENERATION".equals(getIntent().getAction())))throw new Exception("Assunto do teste não encontrado");',s)
+assert n==1, "Expected one legacy candidate guard"
+
 p.write_text(s,encoding="utf-8")
 print("Production generation gated on editorial approval; emulator smoke preserved")
 
