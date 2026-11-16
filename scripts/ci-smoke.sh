@@ -29,12 +29,12 @@ if (( lookup == 0 )); then
   echo 'FALHA: consulta externa dinâmica não validada no Android'
   exit 1
 fi
-echo '--- Gerando MP4 completo sobre tema dinâmico: Buraco negro ---'
+echo '--- Gerando MP4 de teste de codec, sem alegar narração TTS ---'
 # Emuladores podem iniciar o serviço TTS antes do pacote de vozes estar pronto.
 adb shell am broadcast -a android.intent.action.LOCALE_CHANGED >/dev/null 2>&1 || true
 sleep 12
 adb logcat -c || true
-adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_DYNAMIC_VIDEO
+adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION
 ready=0
 for i in $(seq 1 180); do
   sleep 5
@@ -68,4 +68,4 @@ ffprobe -v error -show_entries stream=codec_name,codec_type,width,height -of def
 ffprobe -v error -select_streams v -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q h264
 ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q aac
 test "$(stat -c%s teste/reel-gerado-no-android.mp4)" -gt 100000
-echo 'TESTE REAL OK: MP4 H.264 + AAC gerado sobre assunto dinâmico pesquisado externamente.'
+echo 'TESTE DE CODEC OK: MP4 H.264 + AAC com áudio sintético; narração TTS e conteúdo editorial não validados.'
