@@ -41,3 +41,8 @@ assert 'EditorialQueue.load(getApplicationContext())' in main
 assert 'editorial-backup.json' in main
 assert 'Importação rejeitada' in main
 print("Android editorial JSON import and rollback contract PASS")
+
+assert 'titles.add(candidateKey)' in s
+assert 'Fila contém pauta sem aprovação editorial' in s
+assert 'if(obj==null && !exported.contains(candidateKey))obj=candidate;' in s
+print("Editorial queue duplicate and approval scan PASS")
