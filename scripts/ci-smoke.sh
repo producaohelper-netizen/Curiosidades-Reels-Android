@@ -92,6 +92,8 @@ PY
 echo 'TESTE DE CODEC OK: MP4 H.264 + AAC com áudio sintético; narração TTS e conteúdo editorial não validados.'
 
 echo '--- Teste obrigatório de narração TTS REAL pt-BR ---'
+# Remove vídeos anteriores para impedir falso positivo por arquivo de codec antigo.
+adb shell 'rm -f /sdcard/Movies/HelperReels/*.mp4' || true
 # A opção extra usa NarrationEngine.synthesize, sem áudio sintético.
 adb logcat -c || true
 adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION --ez helper_real_tts true
@@ -113,8 +115,9 @@ if (( tts_ready == 0 )); then
   adb logcat -d -s HelperReels:I HelperReels:E AndroidRuntime:E | tail -100 || true
   exit 1
 fi
-tts_video=$(adb shell ls -t /sdcard/Movies/HelperReels/*.mp4 2>/dev/null | tr -d '\r' | head -1)
+tts_video=$(adb shell find /sdcard/Movies/HelperReels -type f -name '*.mp4' 2>/dev/null | tr -d '\r' | head -1)
 test -n "$tts_video" || { echo 'FALHA: arquivo TTS ausente'; exit 1; }
+test "$(adb shell find /sdcard/Movies/HelperReels -type f -name '*.mp4' 2>/dev/null | wc -l)" -eq 1 || { echo 'FALHA: múltiplos MP4 no teste TTS'; exit 1; }
 adb pull "$tts_video" teste/reel-tts-real-ptbr.mp4
 ffmpeg -hide_banner -loglevel error -xerror -i teste/reel-tts-real-ptbr.mp4 -map 0:a:0 -f null - </dev/null
 python3 - <<'PYTTS'
