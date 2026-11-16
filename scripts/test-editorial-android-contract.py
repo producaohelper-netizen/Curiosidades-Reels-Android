@@ -21,3 +21,8 @@ print("Public generation gate PASS")
 builder=Path("app/src/main/java/br/com/helper/reels/ScriptBuilder.java").read_text(encoding="utf-8")
 assert 'f.key.startsWith("editorial:") ? f.fact' in builder, "Approved narration must not be rewritten"
 print("Reviewed narration preservation PASS")
+
+assert 'last_editorial_key' in main
+assert 'Esta história já foi exportada' in main
+assert main.index('getContentResolver().update(uri,ok,null,null);') < main.index('putString("last_editorial_key"')
+print("Editorial duplicate-export guard PASS")
