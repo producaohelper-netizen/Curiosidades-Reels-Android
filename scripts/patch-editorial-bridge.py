@@ -35,11 +35,19 @@ public final class EditorialQueue {
                     "MainActivity",Context.MODE_PRIVATE).getStringSet(
                         "exported_editorial_keys",java.util.Collections.emptySet());
                 obj=null;
+                java.util.Set<String> titles=new java.util.HashSet<>();
                 for(int i=0;i<queue.length();i++){
                     JSONObject candidate=queue.getJSONObject(i);
                     String candidateTitle=candidate.optString("title","");
                     String candidateKey="editorial:"+FactCatalog.fold(candidateTitle);
-                    if(!exported.contains(candidateKey)){obj=candidate;break;}
+                    if(candidateTitle.trim().length()<10 || !titles.add(candidateKey))
+                        throw new Exception("Título inválido ou repetido na fila");
+                    if(!candidate.optBoolean("review_approved",false)
+                        ||candidate.optBoolean("review_required",true)
+                        ||candidate.optString("reviewer","").trim().isEmpty()
+                        ||candidate.optString("reviewed_at","").trim().isEmpty())
+                        throw new Exception("Fila contém pauta sem aprovação editorial");
+                    if(obj==null && !exported.contains(candidateKey))obj=candidate;
                 }
                 if(obj==null)throw new Exception("Todas as histórias da fila já foram exportadas");
             }
