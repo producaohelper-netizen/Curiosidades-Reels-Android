@@ -18,8 +18,9 @@ adb devices -l
 adb shell getprop ro.build.version.sdk
 adb shell pm list packages | grep -Ei 'tts|speech|googlequicksearch' || true
 adb install -r apk-anterior/app-debug.apk
-old_pkg=$(adb shell pm list packages -3 | tr -d '\r' | sed -n 's/^package://p' | head -1)
-test -n "$old_pkg" || { echo 'ERRO: pacote antigo nao encontrado'; exit 1; }
+old_pkg=$("${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools/35.0.0/aapt" dump badging apk-anterior/app-debug.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
+test -n "$old_pkg" || { echo 'ERRO: identificador do APK anterior nao encontrado'; exit 1; }
+adb shell pm list packages | tr -d '\r' | grep -Fx "package:$old_pkg" || { echo 'ERRO: APK anterior nao foi instalado'; exit 1; }
 echo "Pacote anterior: $old_pkg"
 adb install -r apk/app-debug.apk
 new_pkg="br.com.helper.curiosidadesreels.nova"
