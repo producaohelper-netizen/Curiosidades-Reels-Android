@@ -113,6 +113,10 @@ for i in $(seq 1 60); do
     break
   fi
 done
+if adb logcat -d -s HelperReels:I 2>/dev/null | grep -q 'CI codec smoke: audio de teste'; then
+  echo 'FALHA: caminho sintético acionado durante teste obrigatório de TTS real'
+  exit 1
+fi
 if (( tts_ready == 0 )); then
   echo 'FALHA: MP4 com TTS real não foi publicado no prazo'
   adb logcat -d -s HelperReels:I HelperReels:E AndroidRuntime:E | tail -100 || true
