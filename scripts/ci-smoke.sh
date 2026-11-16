@@ -90,3 +90,45 @@ for stream in (video,audio):
 print(f'FULL DECODE PASS: {duration:.2f}s, {video["width"]}x{video["height"]}, H264/AAC')
 PY
 echo 'TESTE DE CODEC OK: MP4 H.264 + AAC com áudio sintético; narração TTS e conteúdo editorial não validados.'
+
+echo '--- Teste obrigatório de narração TTS REAL pt-BR ---'
+# A opção extra usa NarrationEngine.synthesize, sem áudio sintético.
+adb logcat -c || true
+adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION --ez helper_real_tts true
+tts_ready=0
+for i in $(seq 1 60); do
+  sleep 5
+  if adb logcat -d -s HelperReels:E AndroidRuntime:E 2>/dev/null | grep -Eq 'Generation failure|FATAL EXCEPTION'; then
+    adb logcat -d -s HelperReels:E AndroidRuntime:E | tail -100
+    echo 'FALHA: narração TTS real falhou'
+    exit 1
+  fi
+  if adb logcat -d -s HelperReels:I 2>/dev/null | grep -q 'MP4GERADO com sucesso'; then
+    tts_ready=1
+    break
+  fi
+done
+if (( tts_ready == 0 )); then
+  echo 'FALHA: MP4 com TTS real não foi publicado no prazo'
+  adb logcat -d -s HelperReels:I HelperReels:E AndroidRuntime:E | tail -100 || true
+  exit 1
+fi
+tts_video=$(adb shell ls -t /sdcard/Movies/HelperReels/*.mp4 2>/dev/null | tr -d '\r' | head -1)
+test -n "$tts_video" || { echo 'FALHA: arquivo TTS ausente'; exit 1; }
+adb pull "$tts_video" teste/reel-tts-real-ptbr.mp4
+ffmpeg -hide_banner -loglevel error -xerror -i teste/reel-tts-real-ptbr.mp4 -map 0:a:0 -f null - </dev/null
+python3 - <<'PYTTS'
+import json,subprocess,math
+p='teste/reel-tts-real-ptbr.mp4'
+d=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',p]))
+assert any(x['codec_type']=='video' and x['codec_name']=='h264' for x in d['streams'])
+assert any(x['codec_type']=='audio' and x['codec_name']=='aac' for x in d['streams'])
+raw=subprocess.check_output(['ffmpeg','-v','error','-i',p,'-vn','-ac','1','-ar','16000','-f','s16le','-'])
+import array
+pcm=array.array('h');pcm.frombytes(raw)
+assert len(pcm)>=16000,'TTS audio too short'
+rms=math.sqrt(sum(x*x for x in pcm)/len(pcm))
+assert rms>100, f'TTS track effectively silent: RMS={rms:.1f}'
+print(f'TTS REAL AUDIO CHECK PASS: {len(pcm)/16000:.2f}s, RMS={rms:.1f}')
+PYTTS
+echo 'TTS REAL pt-BR: arquivo MP4 com áudio não silencioso aprovado (inteligibilidade ainda requer escuta humana).'
