@@ -95,7 +95,10 @@ echo '--- Teste obrigatório de narração TTS REAL pt-BR ---'
 # Remove vídeos anteriores para impedir falso positivo por arquivo de codec antigo.
 adb shell 'rm -f /sdcard/Movies/HelperReels/*.mp4' || true
 # A opção extra usa NarrationEngine.synthesize, sem áudio sintético.
+adb shell am force-stop br.com.helper.curiosidadesreels.nova
 adb logcat -c || true
+# Force-stop guarantees onCreate receives the new intent extra, rather than
+# reusing an existing Activity whose getIntent() still selects synthetic audio.
 adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION --ez helper_real_tts true
 tts_ready=0
 for i in $(seq 1 60); do
