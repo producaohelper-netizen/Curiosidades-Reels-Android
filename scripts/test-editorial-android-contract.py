@@ -9,3 +9,8 @@ assert "return null;" in s, "Absent approved story must not be fabricated"
 assert "Pauta ainda não aprovada" in s
 assert "Fontes do mesmo publicador" in s
 print("Android editorial queue contract PASS")
+
+main=Path("app/src/main/java/br/com/helper/reels/MainActivity.java").read_text(encoding="utf-8")
+assert "Pauta editorial obrigatória" in main
+assert "Geração pública bloqueada" in main
+print("Public generation gate PASS")
