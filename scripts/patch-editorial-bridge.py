@@ -52,6 +52,15 @@ public final class EditorialQueue {
             String pillar=obj.optString("pillar","");
             if(!java.util.Arrays.asList("historia_real","ciencia_natureza","misterios_documentados","cotidiano").contains(pillar))
                 throw new Exception("Pilar fora do plano");
+            String hostA=first.getHost().toLowerCase(java.util.Locale.ROOT);
+            String hostB=second.getHost().toLowerCase(java.util.Locale.ROOT);
+            String[] aParts=hostA.split("\\.");
+            String[] bParts=hostB.split("\\.");
+            if(aParts.length>=2 && bParts.length>=2){
+                String publisherA=aParts[aParts.length-2]+"."+aParts[aParts.length-1];
+                String publisherB=bParts[bParts.length-2]+"."+bParts[bParts.length-1];
+                if(publisherA.equals(publisherB))throw new Exception("Fontes do mesmo publicador");
+            }
             FactCatalog.Fact fact=new FactCatalog.Fact(
                 "editorial:"+FactCatalog.fold(title),title,FactCatalog.fold(title),
                 script,"Pauta revisada: "+source+" | "+confirmation,source,"earth");
