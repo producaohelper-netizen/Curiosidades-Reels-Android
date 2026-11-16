@@ -7,9 +7,14 @@ on:
         required: true
         default: https://www.facebook.com/share/r/1JJjT7MGB7/
         type: string
+  schedule:
+    - cron: '17 */6 * * *'
   push:
     branches: [main]
     paths: ['.github/workflows/teste-reel-facebook.yml']
+concurrency:
+  group: teste-reel-facebook
+  cancel-in-progress: false
 jobs:
   test-reel:
     runs-on: ubuntu-latest
