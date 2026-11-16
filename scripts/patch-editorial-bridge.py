@@ -52,5 +52,8 @@ s=s.replace(needle,'''                // Only an approved editorial package may 
                     throw new Exception("Nenhuma história revisada na fila editorial. Importe uma pauta aprovada antes de gerar.");
                 final FactCatalog.Selection choice=candidate;''',1)
 # Ensure old arbitrary requests never enter the pipeline; a bundled reviewed story is the only input.
+import re
+s,n=re.subn(r'(?m)^\\s*if\\(candidate==null\\)throw new Exception[^;]*;\\n','\\n',s)
+assert n==1, "Expected legacy null-candidate guard"
 p.write_text(s,encoding="utf-8")
 print("Android editorial queue bridge: only approved packaged story reaches renderer")
