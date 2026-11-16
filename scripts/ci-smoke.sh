@@ -132,6 +132,16 @@ pcm=array.array('h');pcm.frombytes(raw)
 assert len(pcm)>=16000,'TTS audio too short'
 rms=math.sqrt(sum(x*x for x in pcm)/len(pcm))
 assert rms>100, f'TTS track effectively silent: RMS={rms:.1f}'
-print(f'TTS REAL AUDIO CHECK PASS: {len(pcm)/16000:.2f}s, RMS={rms:.1f}')
+# A short beep or one noisy packet must not pass as sustained narration.
+window=16000//2
+levels=[math.sqrt(sum(x*x for x in pcm[i:i+window])/len(pcm[i:i+window]))
+        for i in range(0,len(pcm)-window+1,window)]
+active=sum(level>100 for level in levels)
+assert active>=3, f'TTS lacks sustained audible segments: {active} active half-second windows'
+duration=float(d['format']['duration'])
+assert duration>=3, f'TTS video too short: {duration:.2f}s'
+subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-xerror','-i',p,
+                '-map','0:v:0','-f','null','-'],check=True,stdin=subprocess.DEVNULL)
+print(f'TTS AUDIO/VIDEO CHECK PASS: {len(pcm)/16000:.2f}s, RMS={rms:.1f}, active_windows={active}')
 PYTTS
 echo 'TTS REAL pt-BR: arquivo MP4 com áudio não silencioso aprovado (inteligibilidade ainda requer escuta humana).'
