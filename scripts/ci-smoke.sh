@@ -30,6 +30,9 @@ if (( lookup == 0 )); then
   exit 1
 fi
 echo '--- Gerando MP4 completo sobre tema dinâmico: Buraco negro ---'
+# Emuladores podem iniciar o serviço TTS antes do pacote de vozes estar pronto.
+adb shell am broadcast -a android.intent.action.LOCALE_CHANGED >/dev/null 2>&1 || true
+sleep 12
 adb logcat -c || true
 adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_DYNAMIC_VIDEO
 ready=0
