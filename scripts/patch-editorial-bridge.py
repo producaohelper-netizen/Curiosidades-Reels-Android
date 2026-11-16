@@ -114,8 +114,9 @@ s=s.replace(worker,'''                final FactCatalog.Selection choice;
                 }else{
                     choice=EditorialQueue.load(getApplicationContext());
                     if(choice==null)throw new Exception("Nenhuma pauta editorial aprovada disponível");
-                    String previous=getPreferences(0).getString("last_editorial_key","");
-                    if(choice.fact.key.equals(previous))
+                    java.util.Set<String> exported=getPreferences(0)
+                        .getStringSet("exported_editorial_keys",java.util.Collections.emptySet());
+                    if(exported.contains(choice.fact.key))
                         throw new Exception("Esta história já foi exportada. Carregue uma nova pauta revisada.");
                 }''',1)
 # Ensure an approved story can be selected even when the legacy catalog has no match.
@@ -129,8 +130,13 @@ s=s.replace(guard_text,'''if(candidate==null && ("br.com.helper.reels.TEST_DYNAM
 published='                getContentResolver().update(uri,ok,null,null);'
 assert published in s, "MP4 publication marker changed"
 s=s.replace(published,published+'''
-                if(choice.fact.key.startsWith("editorial:"))
-                    getPreferences(0).edit().putString("last_editorial_key",choice.fact.key).apply();''',1)
+                if(choice.fact.key.startsWith("editorial:")){
+                    java.util.Set<String> exported=new java.util.HashSet<>(
+                        getPreferences(0).getStringSet("exported_editorial_keys",
+                            java.util.Collections.emptySet()));
+                    exported.add(choice.fact.key);
+                    getPreferences(0).edit().putStringSet("exported_editorial_keys",exported).apply();
+                }''',1)
 p.write_text(s,encoding="utf-8")
 # Editorial scripts already contain a reviewed hook, reveal and CTA. Do not
 # append the legacy generic hook and CTA a second time.
