@@ -20,7 +20,24 @@ public final class EditorialQueue {
                 out.write(buf,0,n);
                 if(out.size()>32000)throw new Exception("Pauta editorial excede tamanho permitido");
             }
-            JSONObject obj=new JSONObject(out.toString("UTF-8"));
+            JSONObject payload=new JSONObject(out.toString("UTF-8"));
+            JSONObject obj=payload;
+            org.json.JSONArray queue=payload.optJSONArray("stories");
+            if(queue!=null){
+                if(queue.length()==0 || queue.length()>30)
+                    throw new Exception("Fila editorial deve conter de 1 a 30 histórias");
+                java.util.Set<String> exported=context.getSharedPreferences(
+                    "MainActivity",Context.MODE_PRIVATE).getStringSet(
+                        "exported_editorial_keys",java.util.Collections.emptySet());
+                obj=null;
+                for(int i=0;i<queue.length();i++){
+                    JSONObject candidate=queue.getJSONObject(i);
+                    String candidateTitle=candidate.optString("title","");
+                    String candidateKey="editorial:"+FactCatalog.fold(candidateTitle);
+                    if(!exported.contains(candidateKey)){obj=candidate;break;}
+                }
+                if(obj==null)throw new Exception("Todas as histórias da fila já foram exportadas");
+            }
             if(!obj.optBoolean("review_approved",false) || obj.optBoolean("review_required",true))
                 throw new Exception("Pauta ainda não aprovada");
             String title=obj.optString("title",""),script=obj.optString("script","");
