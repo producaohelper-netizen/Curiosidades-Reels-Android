@@ -68,4 +68,25 @@ ffprobe -v error -show_entries stream=codec_name,codec_type,width,height -of def
 ffprobe -v error -select_streams v -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q h264
 ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 teste/reel-gerado-no-android.mp4 | grep -q aac
 test "$(stat -c%s teste/reel-gerado-no-android.mp4)" -gt 100000
+echo '--- Decodificação integral de áudio e vídeo ---'
+# ffprobe only checks headers; decoding catches corrupted frames and AAC packets.
+ffmpeg -hide_banner -loglevel error -xerror -i teste/reel-gerado-no-android.mp4 -map 0:v:0 -f null - </dev/null
+ffmpeg -hide_banner -loglevel error -xerror -i teste/reel-gerado-no-android.mp4 -map 0:a:0 -f null - </dev/null
+python3 - <<'PY'
+import json, subprocess
+p='teste/reel-gerado-no-android.mp4'
+data=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',p]))
+streams=data['streams']
+video=next(s for s in streams if s['codec_type']=='video')
+audio=next(s for s in streams if s['codec_type']=='audio')
+duration=float(data['format']['duration'])
+assert 1 <= duration <= 120, f'Invalid video duration: {duration}'
+assert video['width'] > 0 and video['height'] > 0, 'Missing video dimensions'
+assert video['height'] > video['width'], 'Reels video must be portrait'
+assert video['codec_name']=='h264' and audio['codec_name']=='aac'
+for stream in (video,audio):
+    if 'duration' in stream:
+        assert float(stream['duration']) >= duration - 1.0, 'Stream truncated before end'
+print(f'FULL DECODE PASS: {duration:.2f}s, {video["width"]}x{video["height"]}, H264/AAC')
+PY
 echo 'TESTE DE CODEC OK: MP4 H.264 + AAC com áudio sintético; narração TTS e conteúdo editorial não validados.'
