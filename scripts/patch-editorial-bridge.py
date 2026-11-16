@@ -85,6 +85,7 @@ guard="""    private void generate(){
             try{
                 FactCatalog.Selection approved=EditorialQueue.load(getApplicationContext());
                 if(approved==null)throw new Exception("Importe uma história revisada antes de gerar.");
+                throw new Exception("A integração da pauta ao renderizador ainda não foi validada. Geração pública bloqueada.");
             }catch(Exception e){
                 new android.app.AlertDialog.Builder(this)
                     .setTitle("Pauta editorial obrigatória")
