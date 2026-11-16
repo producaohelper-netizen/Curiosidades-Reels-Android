@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 mkdir -p teste
+# Preserve Android diagnostics on every exit, including failures before an MP4 exists.
+# These files are uploaded by the workflow's always() artifact step.
+capture_diagnostics() {
+  local exit_code=$?
+  trap - EXIT
+  echo "CI smoke exit code: $exit_code" > teste/ci-result.txt
+  adb logcat -d -v threadtime > teste/android-logcat.txt 2>&1 || true
+  adb shell dumpsys activity activities > teste/android-activities.txt 2>&1 || true
+  adb shell pm list packages -3 > teste/android-installed-packages.txt 2>&1 || true
+  exit "$exit_code"
+}
+trap capture_diagnostics EXIT
 echo '--- Estado do Android virtual ---'
 adb devices -l
 adb shell getprop ro.build.version.sdk
