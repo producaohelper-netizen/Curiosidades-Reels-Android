@@ -108,11 +108,8 @@ s=s.replace(worker,'''                final FactCatalog.Selection choice;
                     choice=EditorialQueue.load(getApplicationContext());
                     if(choice==null)throw new Exception("Nenhuma pauta editorial aprovada disponível");
                 }''',1)
-# Prevent the old null candidate guard from firing before approved-story handoff.
-import re
-s,n=re.subn(r'(?m)^([ \\t]*)if\\(candidate==null\\)throw new Exception[^;]*;',r'\\1if(candidate==null && ("br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(getIntent().getAction()) || "br.com.helper.reels.TEST_GENERATION".equals(getIntent().getAction())))throw new Exception("Assunto do teste não encontrado");',s)
-assert n==1, "Expected one legacy candidate guard"
-
+# Keep the previous guard intact for now; editorial selection must be injected
+# before any legacy fallback can run. Revisit after inspecting the worker.
 p.write_text(s,encoding="utf-8")
 print("Production generation gated on editorial approval; emulator smoke preserved")
 
