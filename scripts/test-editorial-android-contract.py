@@ -58,3 +58,7 @@ assert 'total>1048576' in main, "Android import must match queue reader size cap
 assert 'application/octet-stream' in main and 'text/plain' in main
 assert 'JSON excede 1 MB' in main
 print("Thirty-story import capacity and JSON MIME support PASS")
+
+assert 'Fila contém fontes do mesmo publicador' in s
+assert 'firstUri.getUserInfo()!=null' in s
+print("Editorial source independence across entire queue PASS")
