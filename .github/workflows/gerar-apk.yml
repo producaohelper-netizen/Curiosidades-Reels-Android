@@ -29,6 +29,7 @@ jobs:
           python3 scripts/patch-strict-trends.py
           python3 scripts/patch-dynamic-topics.py
           python3 scripts/patch-editorial-bridge.py
+          python3 scripts/test-editorial-android-contract.py
           python3 scripts/test-trends-runtime.py
           python3 scripts/test-growth.py
           python3 scripts/test-editorial-30dias.py
