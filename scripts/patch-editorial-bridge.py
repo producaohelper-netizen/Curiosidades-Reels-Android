@@ -71,5 +71,30 @@ public final class EditorialQueue {
 }
 '''
 (root/"EditorialQueue.java").write_text(java,encoding="utf-8")
-# MainActivity remains unchanged until a real reviewed story is packaged.
-print("EditorialQueue compiled; activation pending approved story")
+p=root/"MainActivity.java"
+s=p.read_text(encoding="utf-8")
+needle="    private void generate(){"
+assert needle in s, "Android generation entry point changed"
+guard="""    private void generate(){
+        // Production must never create a video from trends or arbitrary prompts.
+        // Existing emulator smoke actions are isolated codec/network tests.
+        String action=getIntent()==null?"":getIntent().getAction();
+        boolean smoke="br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(action)
+            ||"br.com.helper.reels.TEST_GENERATION".equals(action);
+        if(!smoke){
+            try{
+                FactCatalog.Selection approved=EditorialQueue.load(getApplicationContext());
+                if(approved==null)throw new Exception("Importe uma história revisada antes de gerar.");
+            }catch(Exception e){
+                new android.app.AlertDialog.Builder(this)
+                    .setTitle("Pauta editorial obrigatória")
+                    .setMessage(e.getMessage())
+                    .setPositiveButton("Entendi",null).show();
+                return;
+            }
+        }
+"""
+s=s.replace(needle,guard,1)
+p.write_text(s,encoding="utf-8")
+print("Production generation gated on editorial approval; emulator smoke preserved")
+
