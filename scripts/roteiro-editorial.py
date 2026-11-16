@@ -15,8 +15,10 @@ def produce(brief):
  for field in ("hook","reveal","cta"):
   if not isinstance(brief[field],str) or not 12<=len(brief[field])<=180:
    raise ValueError(field+" precisa ter de 12 a 180 caracteres")
- if not brief.get("source_notes") or len(brief["source_notes"])<40:
+ if not isinstance(brief.get("source_notes"),str) or len(brief["source_notes"])<40:
   raise ValueError("Notas de checagem das duas fontes são obrigatórias")
+ if brief.get("review_approved") is not True:
+  raise ValueError("Pauta não aprovada por revisão editorial")
  if brief["pillar"]=="misterios_documentados" and not all(brief.get(x) for x in ("documented","hypothesis","unknown")):
   raise ValueError("Mistério exige comprovado, hipótese e desconhecido")
  # Use only supplied, reviewed assertions. Do not invent dates, names, or causes.
@@ -26,7 +28,7 @@ def produce(brief):
  count=words(text)
  # Rough 2.3-3.2 words/sec; no fake precision about TTS speed.
  if not 58<=count<=125:raise ValueError("Roteiro fora da faixa 25–45s: "+str(count)+" palavras")
- return {"title":brief["title"],"pillar":brief["pillar"],"script":text,"word_count":count,"duration_estimate_seconds":[round(count/3.2),round(count/2.3)],"sources":[brief["source_primary"],brief["source_confirmation"]],"source_notes":brief["source_notes"],"confidence":brief["confidence"],"review_required":True,"segments":{"hook":brief["hook"],"context":context,"development":facts,"reveal":brief["reveal"],"cta":brief["cta"]}}
+ return {"title":brief["title"],"pillar":brief["pillar"],"script":text,"word_count":count,"duration_estimate_seconds":[round(count/3.2),round(count/2.3)],"sources":[brief["source_primary"],brief["source_confirmation"]],"source_notes":brief["source_notes"],"confidence":brief["confidence"],"review_required":False,"review_approved":True,"segments":{"hook":brief["hook"],"context":context,"development":facts,"reveal":brief["reveal"],"cta":brief["cta"]}}
 def main():
  p=argparse.ArgumentParser();p.add_argument("input");p.add_argument("--output",default="planning/roteiro-aprovacao.json");a=p.parse_args()
  data=json.loads(Path(a.input).read_text(encoding="utf-8"))
