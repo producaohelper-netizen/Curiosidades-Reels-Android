@@ -117,5 +117,13 @@ assert s.count(guard_text)==1, "Legacy candidate guard changed"
 s=s.replace(guard_text,'''if(candidate==null && ("br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(getIntent().getAction())
                     || "br.com.helper.reels.TEST_GENERATION".equals(getIntent().getAction())))throw new Exception''',1)
 p.write_text(s,encoding="utf-8")
-print("Production generation gated on editorial approval; emulator smoke preserved")
+# Editorial scripts already contain a reviewed hook, reveal and CTA. Do not
+# append the legacy generic hook and CTA a second time.
+builder=root/"ScriptBuilder.java"
+story=builder.read_text(encoding="utf-8")
+marker='String narration=hook+" "+f.fact+" "+callToAction;'
+assert story.count(marker)==1, "Legacy narration builder changed"
+story=story.replace(marker,'String narration=f.key.startsWith("editorial:") ? f.fact : hook+" "+f.fact+" "+callToAction;',1)
+builder.write_text(story,encoding="utf-8")
+print("Production generation gated on editorial approval; reviewed narration preserved")
 
