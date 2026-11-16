@@ -183,7 +183,7 @@ activity_result="""    @Override
         }
     }
 """
-s=s.replace(needle,activity_result+guard,1)
+s=s.replace(needle,activity_result+needle,1)
 # Remove misleading legacy controls from the public-facing interface. Test
 # actions still set the same fields programmatically for emulator coverage.
 s=s.replace('trends.setText("Somente tendências reais e inéditas do Google Trends Brasil")',
