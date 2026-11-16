@@ -22,7 +22,8 @@ builder=Path("app/src/main/java/br/com/helper/reels/ScriptBuilder.java").read_te
 assert 'f.key.startsWith("editorial:") ? f.fact' in builder, "Approved narration must not be rewritten"
 print("Reviewed narration preservation PASS")
 
-assert 'last_editorial_key' in main
+assert 'exported_editorial_keys' in main
+assert 'exported.contains(choice.fact.key)' in main
 assert 'Esta história já foi exportada' in main
-assert main.index('getContentResolver().update(uri,ok,null,null);') < main.index('putString("last_editorial_key"')
+assert main.index('getContentResolver().update(uri,ok,null,null);') < main.index('putStringSet("exported_editorial_keys"')
 print("Editorial duplicate-export guard PASS")
