@@ -12,8 +12,13 @@ import java.nio.charset.StandardCharsets;
 public final class EditorialQueue {
     public static FactCatalog.Selection load(Context context) throws Exception {
         InputStream in;
-        try { in=context.getAssets().open("editorial-approved.json"); }
-        catch(java.io.IOException e){return null;}
+        java.io.File imported=new java.io.File(context.getFilesDir(),"editorial-approved.json");
+        if(imported.isFile()){
+            in=new java.io.FileInputStream(imported);
+        }else{
+            try { in=context.getAssets().open("editorial-approved.json"); }
+            catch(java.io.IOException e){return null;}
+        }
         try(in;ByteArrayOutputStream out=new ByteArrayOutputStream()){
             byte[] buf=new byte[4096];int n;
             while((n=in.read(buf))!=-1){
@@ -109,12 +114,68 @@ guard="""    private void generate(){
                 new android.app.AlertDialog.Builder(this)
                     .setTitle("Pauta editorial obrigatória")
                     .setMessage(e.getMessage())
-                    .setPositiveButton("Entendi",null).show();
+                    .setPositiveButton("Importar JSON", (dialog,which)->{
+                        android.content.Intent pick=new android.content.Intent(
+                            android.content.Intent.ACTION_OPEN_DOCUMENT);
+                        pick.addCategory(android.content.Intent.CATEGORY_OPENABLE);
+                        pick.setType("application/json");
+                        startActivityForResult(pick,7421);
+                    })
+                    .setNegativeButton("Cancelar",null).show();
                 return;
             }
         }
 """
 s=s.replace(needle,guard,1)
+# Import into app-private storage; do not silently accept a package that fails
+# the same editorial validation used for bundled assets.
+activity_result="""    @Override
+    protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode!=7421 || resultCode!=RESULT_OK || data==null || data.getData()==null)return;
+        java.io.File target=new java.io.File(getFilesDir(),"editorial-approved.json");
+        java.io.File temporary=new java.io.File(getFilesDir(),"editorial-pending.json");
+        try(java.io.InputStream input=getContentResolver().openInputStream(data.getData());
+            java.io.FileOutputStream output=new java.io.FileOutputStream(temporary)){
+            if(input==null)throw new Exception("Arquivo indisponível");
+            byte[] buf=new byte[4096];int n,total=0;
+            while((n=input.read(buf))!=-1){
+                total+=n;
+                if(total>32000)throw new Exception("JSON excede 32 KB");
+                output.write(buf,0,n);
+            }
+            output.flush();
+            // Temporarily stage the imported package under the production name
+            // and roll back if validation fails.
+            java.io.File backup=new java.io.File(getFilesDir(),"editorial-backup.json");
+            if(backup.exists())backup.delete();
+            boolean hadOld=target.exists();
+            if(hadOld && !target.renameTo(backup))
+                throw new Exception("Não foi possível preservar a fila anterior");
+            try{
+                if(!temporary.renameTo(target))throw new Exception("Falha ao salvar pacote");
+                FactCatalog.Selection selected=EditorialQueue.load(getApplicationContext());
+                if(selected==null)throw new Exception("Pacote sem pauta disponível");
+                if(backup.exists())backup.delete();
+                new android.app.AlertDialog.Builder(this)
+                    .setTitle("Fila editorial importada")
+                    .setMessage("Próxima história: "+selected.fact.title)
+                    .setPositiveButton("OK",null).show();
+            }catch(Exception invalid){
+                target.delete();
+                if(hadOld)backup.renameTo(target);
+                throw invalid;
+            }
+        }catch(Exception e){
+            temporary.delete();
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Importação rejeitada")
+                .setMessage(e.getMessage())
+                .setPositiveButton("OK",null).show();
+        }
+    }
+"""
+s=s.replace(needle,activity_result+guard,1)
 # Remove misleading legacy controls from the public-facing interface. Test
 # actions still set the same fields programmatically for emulator coverage.
 s=s.replace('trends.setText("Somente tendências reais e inéditas do Google Trends Brasil")',
