@@ -98,6 +98,11 @@ guard="""    private void generate(){
         }
 """
 s=s.replace(needle,guard,1)
+# Remove misleading legacy controls from the public-facing interface. Test
+# actions still set the same fields programmatically for emulator coverage.
+s=s.replace('trends.setText("Somente tendências reais e inéditas do Google Trends Brasil")',
+            'trends.setText("Histórias revisadas — sem tendências automáticas")')
+s=s.replace('        if(!smoke){','        if(!smoke){',1)
 # The approved story overrides the legacy catalog only for normal user generation.
 # Smoke tests continue using the existing emulator path.
 worker='                final FactCatalog.Selection choice=candidate;'
