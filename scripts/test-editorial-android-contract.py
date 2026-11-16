@@ -46,3 +46,9 @@ assert 'titles.add(candidateKey)' in s
 assert 'Fila contém pauta sem aprovação editorial' in s
 assert 'if(obj==null && !exported.contains(candidateKey))obj=candidate;' in s
 print("Editorial queue duplicate and approval scan PASS")
+
+assert 'Fila contém pauta incompleta' in s
+assert 'Fila contém mídia não validada' in s
+assert 'for(int j=0;j<candidateMedia.length();j++)' in s
+assert 'Fila contém fontes sem independência' in s
+print("Full editorial queue validation contract PASS")
