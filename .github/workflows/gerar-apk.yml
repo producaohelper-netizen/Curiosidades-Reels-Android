@@ -34,6 +34,7 @@ jobs:
           python3 scripts/test-editorial-30dias.py
           python3 scripts/test-roteiro-editorial.py
           python3 scripts/validar-midias-editoriais.py
+          python3 scripts/test-empacotar-pauta-android.py
           python3 scripts/editorial-30dias.py
           python3 scripts/patch-smoke-codec.py
           python3 scripts/patch-parallel-install.py
