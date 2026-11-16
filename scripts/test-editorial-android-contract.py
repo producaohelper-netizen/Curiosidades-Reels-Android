@@ -12,5 +12,6 @@ print("Android editorial queue contract PASS")
 
 main=Path("app/src/main/java/br/com/helper/reels/MainActivity.java").read_text(encoding="utf-8")
 assert "Pauta editorial obrigatória" in main
-assert "Geração pública bloqueada" in main
+assert "choice=EditorialQueue.load(getApplicationContext())" in main
+assert "Pauta editorial obrigatória" in main
 print("Public generation gate PASS")
