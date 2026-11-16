@@ -59,8 +59,16 @@ public final class EditorialQueue {
                         throw new Exception("Fila contém fonte inválida");
                     java.net.URI firstUri=new java.net.URI(firstSource),secondUri=new java.net.URI(secondSource);
                     if(firstUri.getHost()==null || secondUri.getHost()==null
-                        ||firstUri.getHost().equalsIgnoreCase(secondUri.getHost()))
+                        ||firstUri.getHost().equalsIgnoreCase(secondUri.getHost())
+                        ||firstUri.getUserInfo()!=null || secondUri.getUserInfo()!=null)
                         throw new Exception("Fila contém fontes sem independência");
+                    String[] firstParts=firstUri.getHost().toLowerCase(java.util.Locale.ROOT).split("\\.");
+                    String[] secondParts=secondUri.getHost().toLowerCase(java.util.Locale.ROOT).split("\\.");
+                    if(firstParts.length>=2 && secondParts.length>=2
+                        && (firstParts[firstParts.length-2]+"."+firstParts[firstParts.length-1])
+                          .equals(secondParts[secondParts.length-2]+"."+secondParts[secondParts.length-1]))
+                        throw new Exception("Fila contém fontes do mesmo publicador");
+
                     if(!java.util.Arrays.asList("historia_real","ciencia_natureza",
                         "misterios_documentados","cotidiano").contains(candidate.optString("pillar","")))
                         throw new Exception("Fila contém pilar inválido");
