@@ -1,0 +1,88 @@
+name: Emulador Android - Curiosidades
+
+on:
+  workflow_dispatch:
+    inputs:
+      apk_url:
+        description: 'URL HTTPS direta de um APK (opcional, se o repositório não compilar o APK)'
+        required: false
+        type: string
+  push:
+    branches: [feature/emulador-android-video-ci]
+  pull_request:
+
+jobs:
+  emulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar APK
+        env:
+          APK_URL: ${{ inputs.apk_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p test-output
+          if [ -n "${APK_URL:-}" ]; then
+            case "$APK_URL" in https://*) ;; *) echo 'A URL deve ser HTTPS'; exit 1;; esac
+            curl --fail --location --retry 3 "$APK_URL" -o test-output/app.apk
+          elif [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --stacktrace
+            APK="$(find . -type f -name '*debug*.apk' | head -n 1)"
+            test -n "$APK" || { echo 'Nenhum APK debug encontrado'; exit 1; }
+            cp "$APK" test-output/app.apk
+          else
+            APK="$(find . -type f -name '*.apk' | head -n 1)"
+            test -n "$APK" || { echo 'Não há APK nem gradlew. Execute manualmente informando apk_url.'; exit 1; }
+            cp "$APK" test-output/app.apk
+          fi
+          test -s test-output/app.apk
+
+      - name: Executar no emulador e gravar tela
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel_4
+          emulator-options: -no-window -no-audio -no-snapshot -gpu swiftshader_indirect
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            adb wait-for-device
+            adb install -r test-output/app.apk
+            PKG="$(aapt dump badging test-output/app.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p" | head -1)"
+            test -n "$PKG"
+            echo "Pacote: $PKG"
+            adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1
+            sleep 8
+            adb shell screencap -p /sdcard/curiosidades-inicio.png
+            adb pull /sdcard/curiosidades-inicio.png test-output/inicio.png
+            adb shell screenrecord --time-limit 30 /sdcard/curiosidades-teste.mp4 &
+            REC_PID=$!
+            sleep 32
+            wait "$REC_PID" || true
+            adb pull /sdcard/curiosidades-teste.mp4 test-output/gravacao-emulador.mp4
+            adb logcat -d -v time > test-output/logcat.txt
+            if grep -E "FATAL EXCEPTION|Process: $PKG" test-output/logcat.txt | grep -q 'FATAL EXCEPTION'; then
+              echo 'Possível falha fatal detectada no logcat'
+              exit 1
+            fi
+
+      - name: Publicar evidências
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: curiosidades-emulador-evidencias
+          path: test-output/
+          if-no-files-found: warn
+          retention-days: 14
