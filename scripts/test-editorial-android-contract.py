@@ -52,3 +52,9 @@ assert 'Fila contém mídia não validada' in s
 assert 'for(int j=0;j<candidateMedia.length();j++)' in s
 assert 'Fila contém fontes sem independência' in s
 print("Full editorial queue validation contract PASS")
+
+assert 'out.size()>1048576' in s, "Editorial queue reader must support up to 1 MiB"
+assert 'total>1048576' in main, "Android import must match queue reader size cap"
+assert 'application/octet-stream' in main and 'text/plain' in main
+assert 'JSON excede 1 MB' in main
+print("Thirty-story import capacity and JSON MIME support PASS")
