@@ -43,6 +43,8 @@ public final class EditorialQueue {
                     throw new Exception("Cena sem licença ou descrição");
                 if(!"original".equals(license)&&!scene.optString("source_url","").startsWith("https://"))
                     throw new Exception("Cena sem origem da mídia");
+                if(scene.optBoolean("is_reused_social_video",false))
+                    throw new Exception("Vídeo reutilizado de rede social não permitido");
                 if("cc_by".equals(license)&&scene.optString("attribution","").isEmpty())
                     throw new Exception("Crédito obrigatório da mídia ausente");
             }
