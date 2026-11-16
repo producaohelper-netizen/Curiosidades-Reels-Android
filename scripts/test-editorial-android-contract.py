@@ -27,3 +27,9 @@ assert 'exported.contains(choice.fact.key)' in main
 assert 'Esta história já foi exportada' in main
 assert main.index('getContentResolver().update(uri,ok,null,null);') < main.index('putStringSet("exported_editorial_keys"')
 print("Editorial duplicate-export guard PASS")
+
+assert 'payload.optJSONArray("stories")' in s
+assert 'queue.length()>30' in s
+assert 'exported.contains(candidateKey)' in s
+assert 'Todas as histórias da fila já foram exportadas' in s
+print("Multi-story editorial queue selection contract PASS")
