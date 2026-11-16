@@ -47,6 +47,34 @@ public final class EditorialQueue {
                         ||candidate.optString("reviewer","").trim().isEmpty()
                         ||candidate.optString("reviewed_at","").trim().isEmpty())
                         throw new Exception("Fila contém pauta sem aprovação editorial");
+                    // Validate every story before accepting the imported package, not just the next one.
+                    String candidateScript=candidate.optString("script","");
+                    org.json.JSONArray candidateSources=candidate.optJSONArray("sources");
+                    org.json.JSONArray candidateMedia=candidate.optJSONArray("assets");
+                    if(candidateScript.length()<180 || candidateSources==null || candidateSources.length()<2
+                        ||candidateMedia==null ||candidateMedia.length()==0)
+                        throw new Exception("Fila contém pauta incompleta");
+                    String firstSource=candidateSources.getString(0),secondSource=candidateSources.getString(1);
+                    if(!firstSource.startsWith("https://") || !secondSource.startsWith("https://"))
+                        throw new Exception("Fila contém fonte inválida");
+                    java.net.URI firstUri=new java.net.URI(firstSource),secondUri=new java.net.URI(secondSource);
+                    if(firstUri.getHost()==null || secondUri.getHost()==null
+                        ||firstUri.getHost().equalsIgnoreCase(secondUri.getHost()))
+                        throw new Exception("Fila contém fontes sem independência");
+                    if(!java.util.Arrays.asList("historia_real","ciencia_natureza",
+                        "misterios_documentados","cotidiano").contains(candidate.optString("pillar","")))
+                        throw new Exception("Fila contém pilar inválido");
+                    for(int j=0;j<candidateMedia.length();j++){
+                        JSONObject asset=candidateMedia.getJSONObject(j);
+                        String license=asset.optString("license","");
+                        if(!java.util.Arrays.asList("original","public_domain","cc0","cc_by","licensed").contains(license)
+                            ||asset.optString("scene_text","").trim().isEmpty()
+                            ||asset.optString("description","").trim().isEmpty()
+                            ||asset.optBoolean("is_reused_social_video",false)
+                            ||(!"original".equals(license)&&!asset.optString("source_url","").startsWith("https://"))
+                            ||("cc_by".equals(license)&&asset.optString("attribution","").trim().isEmpty()))
+                            throw new Exception("Fila contém mídia não validada");
+                    }
                     if(obj==null && !exported.contains(candidateKey))obj=candidate;
                 }
                 if(obj==null)throw new Exception("Todas as histórias da fila já foram exportadas");
