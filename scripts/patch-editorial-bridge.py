@@ -23,7 +23,7 @@ public final class EditorialQueue {
             byte[] buf=new byte[4096];int n;
             while((n=in.read(buf))!=-1){
                 out.write(buf,0,n);
-                if(out.size()>32000)throw new Exception("Pauta editorial excede tamanho permitido");
+                if(out.size()>1048576)throw new Exception("Pauta editorial excede tamanho permitido");
             }
             JSONObject payload=new JSONObject(out.toString("UTF-8"));
             JSONObject obj=payload;
@@ -154,7 +154,9 @@ guard="""    private void generate(){
                         android.content.Intent pick=new android.content.Intent(
                             android.content.Intent.ACTION_OPEN_DOCUMENT);
                         pick.addCategory(android.content.Intent.CATEGORY_OPENABLE);
-                        pick.setType("application/json");
+                        pick.setType("*/*");
+                        pick.putExtra(android.content.Intent.EXTRA_MIME_TYPES,
+                            new String[]{"application/json","text/plain","application/octet-stream"});
                         startActivityForResult(pick,7421);
                     })
                     .setNegativeButton("Cancelar",null).show();
@@ -177,7 +179,7 @@ activity_result="""    @Override
             byte[] buf=new byte[4096];int n,total=0;
             while((n=input.read(buf))!=-1){
                 total+=n;
-                if(total>32000)throw new Exception("JSON excede 32 KB");
+                if(total>1048576)throw new Exception("JSON excede 1 MB");
                 output.write(buf,0,n);
             }
             output.flush();
