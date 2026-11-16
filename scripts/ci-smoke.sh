@@ -113,8 +113,12 @@ adb logcat -c || true
 # reusing an existing Activity whose getIntent() still selects synthetic audio.
 adb shell am start -W -n br.com.helper.curiosidadesreels.nova/br.com.helper.reels.MainActivity -a br.com.helper.reels.TEST_GENERATION --ez helper_real_tts true
 tts_ready=0
-for i in $(seq 1 60); do
+for i in $(seq 1 120); do
   sleep 5
+  if (( i % 12 == 0 )); then
+    echo "TTS real: aguardando síntese/MP4 há $((i*5)) segundos"
+    adb logcat -d -s HelperTTS:I HelperReels:E AndroidRuntime:E 2>/dev/null | tail -20 || true
+  fi
   if adb logcat -d -s HelperReels:E AndroidRuntime:E 2>/dev/null | grep -Eq 'Generation failure|FATAL EXCEPTION'; then
     adb logcat -d -s HelperReels:E AndroidRuntime:E | tail -100
     echo 'FALHA: narração TTS real falhou'
