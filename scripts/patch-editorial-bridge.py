@@ -108,8 +108,12 @@ s=s.replace(worker,'''                final FactCatalog.Selection choice;
                     choice=EditorialQueue.load(getApplicationContext());
                     if(choice==null)throw new Exception("Nenhuma pauta editorial aprovada disponível");
                 }''',1)
-# Keep the previous guard intact for now; editorial selection must be injected
-# before any legacy fallback can run. Revisit after inspecting the worker.
+# Ensure an approved story can be selected even when the legacy catalog has no match.
+# This is a textual substitution, not a broad regex over the Java method.
+guard_text="if(candidate==null)throw new Exception"
+assert s.count(guard_text)==1, "Legacy candidate guard changed"
+s=s.replace(guard_text,'''if(candidate==null && ("br.com.helper.reels.TEST_DYNAMIC_VIDEO".equals(getIntent().getAction())
+                    || "br.com.helper.reels.TEST_GENERATION".equals(getIntent().getAction())))throw new Exception''',1)
 p.write_text(s,encoding="utf-8")
 print("Production generation gated on editorial approval; emulator smoke preserved")
 
