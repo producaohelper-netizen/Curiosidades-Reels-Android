@@ -7,6 +7,8 @@ for required in ("editorial-approved.json","review_approved","review_required","
  assert required in s,required
 assert "return null;" in s, "Absent approved story must not be fabricated"
 assert "Pauta ainda não aprovada" in s
+assert "is_reused_social_video" in s
+assert "Fontes do mesmo publicador" in s
 assert "Fontes do mesmo publicador" in s
 print("Android editorial queue contract PASS")
 
