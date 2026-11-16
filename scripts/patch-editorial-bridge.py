@@ -43,17 +43,5 @@ public final class EditorialQueue {
 }
 '''
 (root/"EditorialQueue.java").write_text(java,encoding="utf-8")
-p=root/"MainActivity.java";s=p.read_text(encoding="utf-8")
-needle='                final FactCatalog.Selection choice=candidate;'
-assert needle in s,"Candidate finalization changed"
-s=s.replace(needle,'''                // Only an approved editorial package may enter the new generation pipeline.
-                candidate=EditorialQueue.load(getApplicationContext());
-                if(candidate==null)
-                    throw new Exception("Nenhuma história revisada na fila editorial. Importe uma pauta aprovada antes de gerar.");
-                final FactCatalog.Selection choice=candidate;''',1)
-# Ensure old arbitrary requests never enter the pipeline; a bundled reviewed story is the only input.
-import re
-s,n=re.subn(r'(?m)^\\s*if\\(candidate==null\\)throw new Exception[^;]*;\\n','\\n',s)
-assert n==1, "Expected legacy null-candidate guard"
-p.write_text(s,encoding="utf-8")
-print("Android editorial queue bridge: only approved packaged story reaches renderer")
+# MainActivity remains unchanged until a real reviewed story is packaged.
+print("EditorialQueue compiled; activation pending approved story")
