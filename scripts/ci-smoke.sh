@@ -113,6 +113,17 @@ for i in $(seq 1 60); do
     break
   fi
 done
+# Require evidence that the Android TextToSpeech synthesis returned successfully.
+# An MP4 publication alone cannot prove that the real voice path executed.
+if ! adb logcat -d -s HelperTTS:I 2>/dev/null | grep -q 'REAL_SYNTHESIS_BEGIN'; then
+  echo 'FALHA: caminho TTS real não foi iniciado'
+  exit 1
+fi
+if ! adb logcat -d -s HelperTTS:I 2>/dev/null | grep -q 'REAL_SYNTHESIS_COMPLETE'; then
+  echo 'FALHA: síntese TTS real não terminou'
+  adb logcat -d -s HelperTTS:I HelperReels:E AndroidRuntime:E | tail -100 || true
+  exit 1
+fi
 if adb logcat -d -s HelperReels:I 2>/dev/null | grep -q 'CI codec smoke: audio de teste'; then
   echo 'FALHA: caminho sintético acionado durante teste obrigatório de TTS real'
   exit 1
