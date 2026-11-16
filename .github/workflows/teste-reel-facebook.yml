@@ -1,0 +1,58 @@
+name: Testar Reel Facebook no Android
+on:
+  workflow_dispatch:
+    inputs:
+      reel_url:
+        description: URL pública do Reel
+        required: true
+        default: https://www.facebook.com/share/r/1JJjT7MGB7/
+        type: string
+  push:
+    branches: [main]
+    paths: ['.github/workflows/teste-reel-facebook.yml']
+jobs:
+  test-reel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar URL
+        env:
+          REEL_URL: ${{ inputs.reel_url || 'https://www.facebook.com/share/r/1JJjT7MGB7/' }}
+        run: |
+          case "$REEL_URL" in https://www.facebook.com/*|https://facebook.com/*|https://m.facebook.com/*) ;; *) echo "URL inválida"; exit 1;; esac
+          echo "REEL_URL=$REEL_URL" >> "$GITHUB_ENV"
+      - name: Iniciar emulador e abrir Reel
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel_4
+          disable-animations: true
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect
+          script: |
+            mkdir -p evidencias
+            adb wait-for-device
+            adb shell am start -a android.intent.action.VIEW -d "$REEL_URL"
+            sleep 20
+            adb shell screencap -p /sdcard/reel.png
+            adb pull /sdcard/reel.png evidencias/reel-aberto.png
+            adb shell screenrecord --time-limit 25 /sdcard/reel-gravacao.mp4 &
+            PID=$!
+            sleep 27
+            wait "$PID" || true
+            adb pull /sdcard/reel-gravacao.mp4 evidencias/reel-gravacao.mp4
+            adb logcat -d -v time > evidencias/logcat.txt
+            adb shell uiautomator dump /sdcard/window.xml || true
+            adb pull /sdcard/window.xml evidencias/window.xml || true
+            echo "Teste de abertura concluído; reprodução e áudio exigem validação das evidências." > evidencias/LEIA-ME.txt
+      - name: Enviar evidências
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: teste-reel-facebook
+          path: evidencias/
+          retention-days: 14
