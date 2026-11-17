@@ -48,13 +48,15 @@ jobs:
             mkdir -p evidencias
             adb wait-for-device
             adb shell am start -a android.intent.action.VIEW -d "$REEL_URL"
-            sleep 20
+            sleep 8
+            adb shell uiautomator dump /sdcard/initial.xml || true
+            adb pull /sdcard/initial.xml evidencias/initial.xml || true
+            if grep -q 'Welcome to Chrome' evidencias/initial.xml; then echo 'Chrome first-run onboarding detected; Reel page was not opened.' > evidencias/RESULTADO.txt; exit 1; fi
+            sleep 12
             adb shell screencap -p /sdcard/reel.png
             adb pull /sdcard/reel.png evidencias/reel-aberto.png
             adb shell screenrecord --time-limit 25 /sdcard/reel-gravacao.mp4 &
-            PID=$!
             sleep 27
-            wait "$PID" || true
             adb pull /sdcard/reel-gravacao.mp4 evidencias/reel-gravacao.mp4
             adb logcat -d -v time > evidencias/logcat.txt
             adb shell uiautomator dump /sdcard/window.xml || true
